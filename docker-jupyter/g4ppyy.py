@@ -5,6 +5,10 @@ import cppyy
 #     g4_imported = True
 #     print("Importing GEANT4")
 
+from subprocess import Popen, PIPE
+import os
+
+
 # Intercepts attribute access for this module
 def __getattr__(name):
     
@@ -55,14 +59,11 @@ def lazy_load(name, g4dir="/app/Geant4-11.2.2-Linux/include/Geant4/"):
                 pass
     
 
-
-from subprocess import Popen, PIPE
-import os
-
 print("GEANT4 : Loading modules")
 twopi = 2*3.14159 
+deg = 3.14159/180.0
 
-#cppyy.include('/data/test.hh')
+#cppyy.include('/data/g4definitions.hh')
 cppyy.add_include_path(os.path.abspath('/app/Geant4-11.2.2-Linux/include/Geant4/'))
 os.environ["LD_LIBRARY_PATH"] = '/app/Geant4-11.2.2-Linux/lib64/'
 
@@ -221,14 +222,12 @@ def handle_interactive(gRunManager):
     visManager.Initialize()
 
     UImanager = G4UImanager.GetUIpointer()
-    UImanager.ApplyCommand("/control/execute init_vis.mac")
+    UImanager.ApplyCommand("/control/execute interactive_vis.mac")
 
     ui.SessionStart()
 
 
-def handle_beam(gRunManager, events):
-    gRunManager.Initialize()
-    gRunManager.BeamOn(events)
+
 
 
 
@@ -723,6 +722,697 @@ def build_component(name : str,
     
     gComponentList.append(plac)
     return plac
+
+
+
+
+import k3d
+import numpy as np
+from k3d import matplotlib_color_maps
+
+
+
+import cppyy
+cppyy.include("G4ASCIITree.hh")
+cppyy.include("G4VSceneHandler.hh")
+from cppyy.gbl import G4ASCIITree
+
+cppyy.include("G4VGraphicsSystem.hh")
+cppyy.include("G4VSceneHandler.hh")
+cppyy.include("globals.hh")
+cppyy.include("G4Polyline.hh")
+cppyy.include("G4Circle.hh")
+cppyy.include("G4VMarker.hh")
+cppyy.include("G4Visible.hh")
+
+
+
+
+cppyy.cppdef("""
+class G4NURBS;
+
+class BaseSceneHandler : public G4VSceneHandler {
+public: 
+    BaseSceneHandler(G4VGraphicsSystem &system, G4int id, const G4String &name="") : G4VSceneHandler(system,id,name) {
+    }
+
+    G4Transform3D* GetObjectTransformation(){
+        return &fObjectTransformation;
+    }
+
+    virtual void AddPrimitivePolyhedron(const G4Polyhedron& obj){}
+    virtual void AddPrimitive (const G4Polyhedron& obj){
+        AddPrimitivePolyhedron(obj);
+    };         
+
+    virtual void AddPrimitivePolyline(const G4Polyline& obj){}
+    virtual void AddPrimitive (const G4Polyline& obj){
+        AddPrimitivePolyline(obj);
+    };
+
+    virtual void AddPrimitiveText (const G4Text& obj){};
+    virtual void AddPrimitive (const G4Text& obj){
+        AddPrimitiveText(obj);
+    };
+
+    virtual void AddPrimitiveCircle(const G4Circle& obj){}
+    virtual void AddPrimitive (const G4Circle& obj){
+        AddPrimitiveCircle(obj);
+    };      
+
+    virtual void AddPrimitiveSquare(const G4Square& obj){}
+    virtual void AddPrimitive (const G4Square& obj){
+        AddPrimitiveSquare(obj);
+    };     
+   
+    virtual void AddPrimitiveNURBS (const G4NURBS& obj){};
+    virtual void AddPrimitive (const G4NURBS& obj){
+        AddPrimitiveNURBS(obj);
+    };      
+};""")
+
+cppyy.cppdef("""
+std::vector<std::vector<std::vector<double>>> ObtainPolyhedronVertexFacets(const G4Polyhedron& obj){
+
+std::vector< std::vector<double> > normals_return;
+std::vector< std::vector<double> > vertex_return;
+
+G4bool notLastFace;
+do {
+    G4Point3D vertex[4];
+    G4int edgeFlag[4];
+    G4Normal3D normals[4];
+    G4int nEdges;
+    notLastFace = obj.GetNextFacet(nEdges, vertex, edgeFlag, normals);
+    
+    for(G4int edgeCount = 0; edgeCount < nEdges; ++edgeCount) {
+        std::vector<double> normals_subvect;
+        normals_subvect.push_back(normals[edgeCount].x());
+        normals_subvect.push_back(normals[edgeCount].y());
+        normals_subvect.push_back(normals[edgeCount].z());
+        normals_return.push_back(normals_subvect);
+        
+        std::vector<double> vertex_subvect;
+        vertex_subvect.push_back(vertex[edgeCount].x());
+        vertex_subvect.push_back(vertex[edgeCount].y());
+        vertex_subvect.push_back(vertex[edgeCount].z());
+        vertex_return.push_back(vertex_subvect);
+    }
+
+    if (nEdges == 3) {
+        G4int edgeCount = 3;
+        normals[edgeCount] = normals[0];
+        vertex[edgeCount] = vertex[0];
+
+        std::vector<double> normals_subvect;
+        normals_subvect.push_back(normals[edgeCount].x());
+        normals_subvect.push_back(normals[edgeCount].y());
+        normals_subvect.push_back(normals[edgeCount].z());
+        normals_return.push_back(normals_subvect);
+        
+        std::vector<double> vertex_subvect;
+        vertex_subvect.push_back(vertex[edgeCount].x());
+        vertex_subvect.push_back(vertex[edgeCount].y());
+        vertex_subvect.push_back(vertex[edgeCount].z());
+        vertex_return.push_back(vertex_subvect);
+    }
+} while (notLastFace);  
+
+std::vector<std::vector<std::vector<double>>> compiled;
+compiled.push_back(normals_return);
+compiled.push_back(vertex_return);
+
+return compiled;
+}
+""")
+
+cppyy.cppdef("""
+std::vector<std::vector<double>> GetPolylinePoints(const G4Polyline& line){
+     G4int nPoints = line.size ();
+     std::vector<std::vector<double>> data;
+     if (nPoints <= 0) return data;
+     
+    for (G4int iPoint = 0; iPoint < nPoints; iPoint++) {
+        G4double x, y, z;
+        x = line[iPoint].x(); 
+        y = line[iPoint].y();
+        z = line[iPoint].z();
+        data.push_back({x,y,z});
+    };
+    return data;
+};
+""")
+
+cppyy.cppdef("""
+std::vector<std::vector<int>> ObtainFacets(const G4Polyhedron& obj){
+    std::vector<std::vector<int>> data;
+
+    G4int iFace;
+    G4int n; 
+    G4int iNodes[100];
+    G4int edgeFlags[100];
+    G4int iFaces[100];
+    
+    for (iFace = 0; iFace < obj.GetNoFacets(); iFace++) {
+        obj.GetFacet(iFace+1, n, iNodes, edgeFlags, iFaces);
+        std::vector<int> temp;
+        if (n == 4){
+            temp.push_back(iFaces[0] - 1);
+            temp.push_back(edgeFlags[0]-1);
+            temp.push_back(iNodes[0] - 1);
+            temp.push_back(iNodes[1] - 1);
+            temp.push_back(iNodes[2] - 1);
+            temp.push_back(iNodes[3] - 1);        
+        } else {
+            temp.push_back(iFaces[0] - 1);
+            temp.push_back(edgeFlags[0]-1);
+            temp.push_back(iNodes[0] - 1);
+            temp.push_back(iNodes[1] - 1);
+            temp.push_back(iNodes[2] - 1);
+            temp.push_back(iNodes[0] - 1); 
+        }
+        data.push_back(temp);
+    }    
+    return data;
+};""")
+
+def rgb_to_hex(r, g, b):
+        """Converts RGB values (0-255) to a hex color code.
+    
+        Args:
+            r (int): Red value (0-255).
+            g (int): Green value (0-255).
+            b (int): Blue value (0-255).
+    
+        Returns:
+            str: Hex color code (e.g., '#FF0000').
+        """
+    
+        # Ensure RGB values are within the valid range
+        r = int(r*255)
+        g = int(g*255)
+        b = int(b*255)
+    
+        r = max(0, min(r, 255))
+        g = max(0, min(g, 255))
+        b = max(0, min(b, 255))
+    
+        # Convert each RGB value to its hexadecimal representation
+        hex_r = hex(r)[2:].upper()
+        hex_g = hex(g)[2:].upper()
+        hex_b = hex(b)[2:].upper()
+    
+        # Pad each hexadecimal value with a leading zero if necessary
+        hex_r = hex_r.zfill(2)
+        hex_g = hex_g.zfill(2)
+        hex_b = hex_b.zfill(2)
+    
+        # Combine the hexadecimal values into a single hex color code    
+        hex_color =  int(hex_r + hex_g + hex_b,16)
+        return hex_color
+
+
+import plotly.graph_objects as go
+global gfig
+gfig = k3d.plot()
+
+global k3d_polyline_vertices
+k3d_polyline_vertices = []
+global k3d_polyline_indices
+k3d_polyline_indices = []
+global k3d_polyline_colors
+k3d_polyline_colors = []
+global k3d_polyline_colors2
+k3d_polyline_colors2 = []
+global k3d_polyline_origins
+k3d_polyline_origins = []
+
+global k3d_polyline_vectors
+k3d_polyline_vectors = []
+
+global k3d_circle_vertices
+k3d_circle_vertices = []
+global k3d_circle_sizes
+k3d_circle_sizes = []
+global k3d_circle_colors
+k3d_circle_colors = []
+
+
+class JupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
+    def __init__(self, system, id, name):
+        super().__init__(system, id, name)
+        self.global_data = []
+        self.current_transform = None
+        self.nlines = 0
+        
+        
+        # self.fig = go.Figure(data=self.global_data)
+        # self.fig.update_layout( autosize=False, width=800, height=800, ) 
+        # self.fig.show()
+        # self.fig = k3d.plot()
+        # global gfig
+        # gfig = self.fig
+
+    # def BeginModelling(self):
+        # print("Begin modelling")
+
+    # def EndModelling(self):
+        # print("End Modelling")
+        
+    # def BeginPrimitives(self, objectTransformation):
+    #     super().BeginPrimitives(objectTransformation)
+    #     print("Begin primitives", objectTransformation)
+    #     self.current_transform = objectTransformation
+
+    # def EndPrimitives(self):
+    #     super().BeginPrimitives()
+    #     print("End primitives")
+    #     self.current_transform = None
+    #     # self.fig = go.Figure(data=self.global_data)
+        # self.fig.update_layout( autosize=False, width=800, height=800, ) 
+        # self.fig.show()
+        # self.fig.display()
+
+    
+    def AddPrimitivePolyline(self, obj):
+        self.current_transform = self.GetObjectTransformation()
+        self.nlines += 1
+
+
+        global k3d_polyline_vertices
+        global k3d_polyline_indices
+        global k3d_polyline_colors
+
+        global k3d_polyline_origins
+        global k3d_polyline_vectors
+
+        
+        # Limit k3D Drawer
+        if len(k3d_polyline_indices) > 10000: return
+
+
+        vis = obj.GetVisAttributes()
+        color = vis.GetColor()
+        r = float(color.GetRed())
+        b = float(color.GetBlue())
+        g = float(color.GetGreen())
+        cval = rgb_to_hex(r,g,b)
+        # print("VISATTDFEGS", vis.GetAttDefs())
+        
+        
+        vertices = cppyy.gbl.GetPolylinePoints(obj)
+
+        for v in vertices:
+            p = G4ThreeVector(v[0], v[1], v[2])
+            p = self.current_transform.getRotation()*p + self.current_transform.getTranslation()
+            id1 = len(k3d_polyline_vertices)
+            k3d_polyline_vertices.append( [float(p.x()), float(p.y()), float(p.z())] )
+            id2 = len(k3d_polyline_vertices)
+            k3d_polyline_colors.append(cval)
+            
+            if len(k3d_polyline_vertices) >= 2:
+                k3d_polyline_indices.append([id1-1,id2-1])
+                
+                k3d_polyline_origins.append([(k3d_polyline_vertices[id1-1][0] + k3d_polyline_vertices[id2-1][0])/2,
+                                            (k3d_polyline_vertices[id1-1][1] + k3d_polyline_vertices[id2-1][1])/2,
+                                            (k3d_polyline_vertices[id1-1][2] + k3d_polyline_vertices[id2-1][2])/2])
+    
+                k3d_polyline_vectors.append([(k3d_polyline_vertices[id2-1][0] - k3d_polyline_vertices[id1-1][0])/4,
+                                            (k3d_polyline_vertices[id2-1][1] - k3d_polyline_vertices[id1-1][1])/4,
+                                            (k3d_polyline_vertices[id2-1][2] - k3d_polyline_vertices[id1-1][2])/4])
+                k3d_polyline_colors2.append(cval)
+                
+
+        # if len(k3d_polyline_vertices) % 100 == 0:
+            # print("ADDING POLYLINE", len(k3d_polyline_vertices))
+        
+        
+    def AddPolyLinesAtEnd(self):
+        global k3d_polyline_vertices
+        global k3d_polyline_indices
+        polyline_k3d_vertices_np = np.array(k3d_polyline_vertices).astype(np.float32)
+        polyline_k3d_indices_np = np.array(k3d_polyline_indices).astype(np.uint32)
+        polyline_k3d_colors_np = np.array(k3d_polyline_colors).astype(np.uint32)
+
+        global k3d_polyline_origins
+        global k3d_polyline_vectors
+        global k3d_polyline_colors2
+        
+
+        polyline_k3d_origins_np = np.array(k3d_polyline_origins).astype(np.float32)
+        polyline_k3d_vectors_np = np.array(k3d_polyline_vectors).astype(np.float32)
+        polyline_k3d_colors2_np = np.array(k3d_polyline_colors2).astype(np.uint32)
+        
+        global gfig
+        gfig += k3d.lines(vertices=polyline_k3d_vertices_np, 
+                          indices=polyline_k3d_indices_np, 
+                          indices_type='segment',
+                          shader='simple',
+                          width=0.5,
+                          colors=polyline_k3d_colors_np) 
+
+        print("ADDING VECTORS")
+        # gfig += k3d.vectors(polyline_k3d_origins_np, polyline_k3d_vectors_np,
+        #                   line_width=2.0)
+        global k3d_circle_vertices
+        global k3d_circle_sizes
+        global k3d_circle_colors
+        
+        print("CIRCLES", k3d_circle_sizes)
+        gfig += k3d.points(positions=np.array(k3d_circle_vertices).astype(np.float32),
+                        point_sizes=k3d_circle_sizes,
+                        shader='flat', colors=k3d_circle_colors)
+
+        #, color=0xc6884b, shader='mesh', width=0.025)
+        # gfig += k3d.line(k3d_vertices, color=0xc6884b, shader='mesh', width=2)
+
+    
+    def AddPrimitiveCircle(self, obj):
+        self.current_transform = self.GetObjectTransformation()
+        self.nlines += 1
+
+        global k3d_circle_vertices
+        global k3d_circle_sizes
+        global k3d_circle_colors
+        
+        # Limit k3D Drawer
+        if len(k3d_circle_vertices) > 10000: return
+        size = obj.GetScreenSize()*2
+
+        vis = obj.GetVisAttributes()
+        color = vis.GetColor()
+        r = float(color.GetRed())
+        b = float(color.GetBlue())
+        g = float(color.GetGreen())
+        cval = rgb_to_hex(r,g,b)
+
+        
+        p = obj.GetPosition()
+        # G4ThreeVector(0.0,0.0,0.0)
+        # p = p + self.current_transform.getTranslation()
+
+        k3d_circle_vertices.append( [float(p.x()), float(p.y()), float(p.z())] )
+        k3d_circle_sizes.append(size)
+        k3d_circle_colors.append(cval)
+        
+        return
+
+    
+    def AddPrimitivePolyhedron(self, obj):
+        self.current_transform = self.GetObjectTransformation()
+        
+
+        vertices = []
+        for i in range(obj.GetNoVertices()):
+            p3d = obj.GetVertex(i+1)
+            vertices.append( [p3d[0], p3d[1], p3d[2]] )
+
+        facets = cppyy.gbl.ObtainFacets(obj)
+
+        normals = []
+        for i in range(obj.GetNoFacets()):
+            f3d = obj.GetUnitNormal(i+1)
+            normals.append( (f3d[0], f3d[1], f3d[2]) )
+
+        k3d_vertices = []
+        for v in vertices:
+            p = G4ThreeVector(v[0], v[1], v[2])
+            p = self.current_transform.getRotation()*p + self.current_transform.getTranslation()
+            k3d_vertices.append( [float(p.x()), float(p.y()), float(p.z())] )
+
+        k3d_normals = []
+        for n in normals:
+            p = G4ThreeVector(n[0], n[1], n[2])
+            p = self.current_transform.getRotation()*p 
+            k3d_normals.append( [float(p.x()), float(p.y()), float(p.z())] )
+
+        k3d_indices = []
+        for f in facets:
+            ff = [f[2], f[3], f[4], f[5]]
+            k3d_indices.append( [ff[0], ff[1], ff[2]] )
+            k3d_indices.append( [ff[0], ff[1], ff[3]] )
+            k3d_indices.append( [ff[0], ff[2], ff[1]] )
+            k3d_indices.append( [ff[0], ff[2], ff[3]] )
+            k3d_indices.append( [ff[0], ff[3], ff[2]] )
+            k3d_indices.append( [ff[0], ff[3], ff[3]] )
+
+            k3d_indices.append( [ff[1], ff[0], ff[2]] )
+            k3d_indices.append( [ff[1], ff[0], ff[3]] )
+            k3d_indices.append( [ff[1], ff[2], ff[0]] )
+            k3d_indices.append( [ff[1], ff[2], ff[3]] )
+            k3d_indices.append( [ff[1], ff[3], ff[0]] )
+            k3d_indices.append( [ff[1], ff[3], ff[3]] )
+
+            k3d_indices.append( [ff[2], ff[0], ff[1]] )
+            k3d_indices.append( [ff[2], ff[0], ff[3]] )
+            k3d_indices.append( [ff[2], ff[1], ff[0]] )
+            k3d_indices.append( [ff[2], ff[1], ff[3]] )
+            k3d_indices.append( [ff[2], ff[3], ff[0]] )
+            k3d_indices.append( [ff[2], ff[3], ff[1]] )
+            
+            
+            
+            
+            
+        k3d_vertices = np.array(k3d_vertices).astype(np.float32)
+        k3d_normals = np.array(k3d_normals).astype(np.float32)
+        k3d_indices = np.array(k3d_indices).astype(np.uint32)
+
+        global gfig
+        vis = obj.GetVisAttributes()
+        
+        color = vis.GetColor()
+        style = vis.GetForcedDrawingStyle()
+        visbl = vis.IsVisible()
+
+        opacity = color.GetAlpha()
+        if not visbl: opacity = 0.0
+
+        r = float(color.GetRed())
+        b = float(color.GetBlue())
+        g = float(color.GetGreen())
+
+        # def rgb_to_hex(rgb):
+        #     return '#%02x%02x%02x' % rgb
+       
+        iswireframe = False
+        if vis.GetForcedDrawingStyle() == G4VisAttributes.wireframe:
+            iswireframe = True
+            
+        gfig += k3d.mesh(np.array(k3d_vertices), 
+                         np.array(k3d_indices), 
+                         np.array(k3d_normals), 
+                         name="Object",
+                         opacity=opacity,
+                         wireframe=iswireframe,
+                         color=rgb_to_hex(r,g,b))
+        
+        #          # opacity=0.25, wireframe=True, color=0x0002)
+
+        
+        # # self.fig.display()
+
+    
+
+    # def AddPrimitiveCircle(self, obj):
+    #     print("ADDING CIRCLE")
+    #     return
+
+import matplotlib.pyplot as plt
+
+class JupyterViewer(cppyy.gbl.G4VViewer):
+    def __init__(self, scene, id, name):
+        super().__init__(scene, id, name)
+        self.name = "JUPYTER"
+        self.scene = scene
+        # print("Building Viewer")
+        # self.fig = None
+
+    def SetView(self):
+        return
+
+    def ClearView(self):
+        return
+
+    def DrawView(self):
+        self.scene.global_data = []   
+        self.ProcessView()
+        return
+
+    def FinishView(self):
+        print("FINISH VIEW")
+        self.scene.AddPolyLinesAtEnd()
+    
+    # def ShowView(self):
+        # print("SHOWING VIEW")
+        
+
+
+
+cppyy.cppdef("""
+class BaseGS : public G4VGraphicsSystem {
+public: 
+    BaseGS() : G4VGraphicsSystem("Jupyter","Jupyter",G4VGraphicsSystem::threeD) {
+        fName = "Jupyter";
+        fNicknames = {"Jupyter"};
+      fDescription = "Jupyter";
+      fFunctionality = G4VGraphicsSystem::threeD;
+    }
+
+    virtual G4VSceneHandler* CreateSceneHandler (const G4String& name) { std::cout << "RETURNING BASE HANDLER" << std::endl; return NULL; };
+    virtual G4VViewer* CreateViewer (G4VSceneHandler& scenehandler, const G4String& name) { std::cout << "RETURNING BASE VIEWER" << std::endl; return NULL; };
+
+};""")
+
+
+
+
+class JupyterGraphicsSystem(cppyy.gbl.BaseGS):
+
+    def __init__(self):
+        super().__init__()
+        
+    def CreateSceneHandler(self,name):
+        self.name = name
+        # print("Returning scene handler", name)
+        self.handler = JupyterSceneHandler(self, 0, name)
+        # print("Passing back")
+        return self.handler
+
+    def CreateViewer(self, scenehandler, name):
+        self.scenehandler = scenehandler
+        # print("Returning scene viewer")
+        self.viewer = JupyterViewer(scenehandler, 0, name)
+        # print("Passing back")
+        return self.viewer
+        
+    def IsUISessionCompatible(self):
+        # print("Checking compatible")
+        return True
+
+
+class PyCRUSTVisExecutive(G4VisExecutive):
+    def RegisterGraphicsSystems(self):
+        self.val = JupyterGraphicsSystem()
+        self.RegisterGraphicsSystem(self.val);
+        self.gs = self.val
+
+
+
+# Tools to handle vis components
+global visManager
+visManager = None
+
+global ui
+ui = None
+
+def create_visualization(gRunManager):
+    global visManager
+    if not visManager:
+        visManager = PyCRUSTVisExecutive("quiet")
+        visManager.Initialize()
+
+    global ui
+    if not ui:
+        ui = G4UIExecutive(1,["test"])
+        # ui.SessionStart()
+
+    UImanager = G4UImanager.GetUIpointer()
+    UImanager.ExecuteMacroFile("jupyter_vis.mac")
+
+# global plotting_hooks
+# plotting_hooks = []
+
+# global plotting_args
+# plotting_args = []
+
+# def add_visualization_hook(f, a=None):
+#     global plotting_hooks
+#     global plotting_args
+
+#     plotting_hooks.append(f)
+#     plotting_args.append(a)
+
+
+
+global detector_hooks
+detector_hooks = []
+
+def register_detector_hooks(det):
+    global detector_hooks
+    detector_hooks.append(det)
+
+def register_processor_hooks(det):
+    register_detector_hooks(det)
+
+def register_tracking_hooks(det):
+    register_detector_hooks(det)
+    
+
+
+
+# global runstart_hooks
+# runstart_hooks = []
+
+# global runstart_args
+# runstart_args = []
+
+# def add_runstart_hook(f, a=None):
+#     global runstart_hooks
+#     global runstart_args
+
+#     runstart_hooks.append(f)
+#     runstart_args.append(a)
+    
+    
+def draw_visualization(gRunManager):
+    global gfig
+    visManager.gs.viewer.scene.AddPolyLinesAtEnd()
+    gfig.display()
+
+    # global plotting_hooks
+    # global plotting_args
+    # for f, a in zip(plotting_hooks,plotting_args):
+    #     if a: f(a)
+    #     else: f()
+
+    global detector_hooks
+    for obj in detector_hooks:
+        start_action = getattr(obj, "VisualizationAction", None)
+        if callable(start_action):
+            start_action()
+
+def supress_startup():
+    UImanager = G4UImanager.GetUIpointer()
+    UImanager.ExecuteMacroFile("jupyter_quiet.mac")
+
+def quiet_initialize(gRunManager):
+    supress_startup()
+    gRunManager.Initialize()
+
+def handle_beam(gRunManager, events):
+            
+    gRunManager.Initialize()
+
+    global detector_hooks
+    for obj in detector_hooks:
+        start_action = getattr(obj, "StartOfRunAction", None)
+        if callable(start_action):
+            start_action()
+            
+    # global runstart_hooks
+    # global runstart_args
+    # for f, a in zip(runstart_hooks,runstart_args):
+    #     if a: f(a)
+    #     else: f()
+            
+    gRunManager.BeamOn(events)
+
+    for obj in detector_hooks:
+        end_action = getattr(obj, "EndOfRunAction", None)
+        if callable(end_action):
+            end_action()
+
 
 
 
