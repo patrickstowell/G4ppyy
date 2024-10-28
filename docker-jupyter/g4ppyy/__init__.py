@@ -1,10 +1,4 @@
 import cppyy
-
-# global g4_imported
-# if not g4_imported:
-#     g4_imported = True
-#     print("Importing GEANT4")
-
 from subprocess import Popen, PIPE
 import os
 
@@ -77,12 +71,8 @@ lib_dir = vals[0].replace("-L","")
 libraries = []
 for x in vals[1:]:
     libraries.append( x.replace("-l","") )
-# libraries.reverse()
-
-# print(lib_dir, libraries)
 
 cppyy.add_library_path(os.path.abspath("/app/Geant4-11.2.2-Linux/lib64/"))
-
 
 count = 0
 while len(libraries) > 0 and count < 5:
@@ -102,7 +92,6 @@ while len(libraries) > 0 and count < 5:
 
 #cppyy.load_library("libG4visQt3D.dylib")
 print("GEANT4 : Loading complete.")
-
 
 cppyy.include('G4UImanager.hh')
 cppyy.include('G4UIterminal.hh')
@@ -153,7 +142,6 @@ gNistManager = cppyy.gbl.G4NistManager.Instance()
 cppyy.include('G4VUserDetectorConstruction.hh')
 G4VUserDetectorConstruction = cppyy.gbl.G4VUserDetectorConstruction
 
-
 cppyy.include("G4ThreeVector.hh")
 G4ThreeVector = cppyy.gbl.G4ThreeVector
 
@@ -199,21 +187,6 @@ G4VisExecutive = cppyy.gbl.G4VisExecutive
 G4UIExecutive = cppyy.gbl.G4UIExecutive
 
 
-
-def handle_raytrace(gRunManager):
-    gRunManager.Initialize()
-    ui = G4UIExecutive(1,["test"])
-
-    visManager = G4VisExecutive()
-    visManager.Initialize()
-
-    UImanager = G4UImanager.GetUIpointer()
-    UImanager.ExecuteMacroFile("macros/raytracer.mac")
-
-    ui.SessionStart()
-
-
-
 def handle_interactive(gRunManager):
     gRunManager.Initialize()
     ui = G4UIExecutive(1,["test"])
@@ -222,13 +195,9 @@ def handle_interactive(gRunManager):
     visManager.Initialize()
 
     UImanager = G4UImanager.GetUIpointer()
-    UImanager.ApplyCommand("/control/execute interactive_vis.mac")
+    UImanager.ExecuteMacroFile(os.path.dirname(__file__) + "/interactive_vis.mac")
 
     ui.SessionStart()
-
-
-
-
 
 
 global handle_objects
@@ -264,21 +233,10 @@ def GetMaterial(name):
     return gNistManager.FindOrBuildMaterial(name)
 
 cppyy.include("G4SystemOfUnits.hh")
-
 from cppyy.gbl import cm, mm, m, eV, MeV, GeV, kg, g
-
-
 
 cppyy.include("G4Element.hh")
 from cppyy.gbl import G4Element
-
-
-
-
-
-
-
-
 
 # Material Helpers
 def material_from_elements(name : str,
@@ -496,9 +454,7 @@ cppyy.include("G4Sphere.hh")
 cppyy.include("G4Tubs.hh")
 cppyy.include("G4VSolid.hh")
 
-
 from cppyy.gbl import G4VSolid
-
 
 def G4Box(name, 
           x : float = 1.0*m, 
@@ -718,7 +674,7 @@ def build_component(name : str,
             name,
             mother,  
             False, 
-            0)
+            1)
     
     gComponentList.append(plac)
     return plac
@@ -1071,14 +1027,12 @@ class JupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
                           width=0.5,
                           colors=polyline_k3d_colors_np) 
 
-        print("ADDING VECTORS")
         # gfig += k3d.vectors(polyline_k3d_origins_np, polyline_k3d_vectors_np,
         #                   line_width=2.0)
         global k3d_circle_vertices
         global k3d_circle_sizes
         global k3d_circle_colors
         
-        print("CIRCLES", k3d_circle_sizes)
         gfig += k3d.points(positions=np.array(k3d_circle_vertices).astype(np.float32),
                         point_sizes=k3d_circle_sizes,
                         shader='flat', colors=k3d_circle_colors)
@@ -1191,9 +1145,6 @@ class JupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         r = float(color.GetRed())
         b = float(color.GetBlue())
         g = float(color.GetGreen())
-
-        # def rgb_to_hex(rgb):
-        #     return '#%02x%02x%02x' % rgb
        
         iswireframe = False
         if vis.GetForcedDrawingStyle() == G4VisAttributes.wireframe:
@@ -1207,17 +1158,7 @@ class JupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
                          wireframe=iswireframe,
                          color=rgb_to_hex(r,g,b))
         
-        #          # opacity=0.25, wireframe=True, color=0x0002)
-
-        
-        # # self.fig.display()
-
-    
-
-    # def AddPrimitiveCircle(self, obj):
-    #     print("ADDING CIRCLE")
-    #     return
-
+      
 import matplotlib.pyplot as plt
 
 class JupyterViewer(cppyy.gbl.G4VViewer):
@@ -1225,8 +1166,6 @@ class JupyterViewer(cppyy.gbl.G4VViewer):
         super().__init__(scene, id, name)
         self.name = "JUPYTER"
         self.scene = scene
-        # print("Building Viewer")
-        # self.fig = None
 
     def SetView(self):
         return
@@ -1243,8 +1182,6 @@ class JupyterViewer(cppyy.gbl.G4VViewer):
         print("FINISH VIEW")
         self.scene.AddPolyLinesAtEnd()
     
-    # def ShowView(self):
-        # print("SHOWING VIEW")
         
 
 
@@ -1258,36 +1195,25 @@ public:
       fDescription = "Jupyter";
       fFunctionality = G4VGraphicsSystem::threeD;
     }
-
-    virtual G4VSceneHandler* CreateSceneHandler (const G4String& name) { std::cout << "RETURNING BASE HANDLER" << std::endl; return NULL; };
-    virtual G4VViewer* CreateViewer (G4VSceneHandler& scenehandler, const G4String& name) { std::cout << "RETURNING BASE VIEWER" << std::endl; return NULL; };
-
+    virtual G4VSceneHandler* CreateSceneHandler (const G4String& name) { return NULL; };
+    virtual G4VViewer* CreateViewer (G4VSceneHandler& scenehandler, const G4String& name) { return NULL; };
 };""")
 
-
-
-
 class JupyterGraphicsSystem(cppyy.gbl.BaseGS):
-
     def __init__(self):
         super().__init__()
         
     def CreateSceneHandler(self,name):
         self.name = name
-        # print("Returning scene handler", name)
         self.handler = JupyterSceneHandler(self, 0, name)
-        # print("Passing back")
         return self.handler
 
     def CreateViewer(self, scenehandler, name):
         self.scenehandler = scenehandler
-        # print("Returning scene viewer")
         self.viewer = JupyterViewer(scenehandler, 0, name)
-        # print("Passing back")
         return self.viewer
         
     def IsUISessionCompatible(self):
-        # print("Checking compatible")
         return True
 
 
@@ -1296,7 +1222,6 @@ class PyCRUSTVisExecutive(G4VisExecutive):
         self.val = JupyterGraphicsSystem()
         self.RegisterGraphicsSystem(self.val);
         self.gs = self.val
-
 
 
 # Tools to handle vis components
@@ -1315,25 +1240,9 @@ def create_visualization(gRunManager):
     global ui
     if not ui:
         ui = G4UIExecutive(1,["test"])
-        # ui.SessionStart()
 
     UImanager = G4UImanager.GetUIpointer()
-    UImanager.ExecuteMacroFile("jupyter_vis.mac")
-
-# global plotting_hooks
-# plotting_hooks = []
-
-# global plotting_args
-# plotting_args = []
-
-# def add_visualization_hook(f, a=None):
-#     global plotting_hooks
-#     global plotting_args
-
-#     plotting_hooks.append(f)
-#     plotting_args.append(a)
-
-
+    UImanager.ExecuteMacroFile(os.path.dirname(__file__) + "/jupyter_vis.mac")
 
 global detector_hooks
 detector_hooks = []
@@ -1347,34 +1256,11 @@ def register_processor_hooks(det):
 
 def register_tracking_hooks(det):
     register_detector_hooks(det)
-    
-
-
-
-# global runstart_hooks
-# runstart_hooks = []
-
-# global runstart_args
-# runstart_args = []
-
-# def add_runstart_hook(f, a=None):
-#     global runstart_hooks
-#     global runstart_args
-
-#     runstart_hooks.append(f)
-#     runstart_args.append(a)
-    
-    
+        
 def draw_visualization(gRunManager):
     global gfig
     visManager.gs.viewer.scene.AddPolyLinesAtEnd()
     gfig.display()
-
-    # global plotting_hooks
-    # global plotting_args
-    # for f, a in zip(plotting_hooks,plotting_args):
-    #     if a: f(a)
-    #     else: f()
 
     global detector_hooks
     for obj in detector_hooks:
@@ -1382,9 +1268,10 @@ def draw_visualization(gRunManager):
         if callable(start_action):
             start_action()
 
+import os 
 def supress_startup():
     UImanager = G4UImanager.GetUIpointer()
-    UImanager.ExecuteMacroFile("jupyter_quiet.mac")
+    UImanager.ExecuteMacroFile(os.path.dirname(__file__) + "/jupyter_quiet.mac")
 
 def quiet_initialize(gRunManager):
     supress_startup()
@@ -1399,12 +1286,6 @@ def handle_beam(gRunManager, events):
         start_action = getattr(obj, "StartOfRunAction", None)
         if callable(start_action):
             start_action()
-            
-    # global runstart_hooks
-    # global runstart_args
-    # for f, a in zip(runstart_hooks,runstart_args):
-    #     if a: f(a)
-    #     else: f()
             
     gRunManager.BeamOn(events)
 

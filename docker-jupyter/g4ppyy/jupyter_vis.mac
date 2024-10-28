@@ -39,6 +39,13 @@
 /vis/filtering/trajectories/encounteredVolumeFilter-0/add world
 
 
+/vis/filtering/trajectories/create/particleFilter
+/vis/filtering/trajectories/particleFilter-0/add mu-
+/vis/filtering/trajectories/particleFilter-0/add mu-
+/vis/filtering/trajectories/particleFilter-0/invert true
+
+
+
 /vis/set/colour red
 /vis/set/lineWidth 2
 /vis/scene/add/frame   # Simple frame around the view

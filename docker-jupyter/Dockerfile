@@ -56,7 +56,7 @@ RUN sudo chmod 777 /data/* /data/; sudo chmod 777 /data/
 ENV PATH=//app/Geant4-11.2.2-Linux/bin/:$PATH
 ENV LD_LIBRARY_PATH=/app/Geant4-11.2.2-Linux/lib64/
 ENV LD_PRELOAD=/app/Geant4-11.2.2-Linux/lib64/libG4run.so 
-ENV PYTHONPATH=/data/
+ENV PYTHONPATH=./:../:/data/
 ENV GEANT4_DATA_DIR=/app/Geant4-11.2.2-Linux/share/Geant4/data
 ENV PATH=/app/Geant4-11.2.2-Linux/bin:/home/pycrust/.local/bin:/home/pycrust/bin://app/Geant4-11.2.2-Linux/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
