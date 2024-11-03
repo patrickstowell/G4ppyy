@@ -12,6 +12,8 @@ G4VUserDetectorConstruction = _lzl.G4VUserDetectorConstruction
 from .._si_units import *
 G4VSolid = _lzl.G4VSolid
 G4LogicalVolume = _lzl.G4LogicalVolume
+G4Sphere = _lzl.G4Color
+
 
 # ------------------
 # MATERIALS
