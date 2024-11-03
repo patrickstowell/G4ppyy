@@ -32,6 +32,12 @@ def ext_cmd(cmd):
 # -----------------------
 print("[G4PPYY] : Loading G4 Modules.")
 
+# Check geant4-config present
+_check = ext_cmd("which geant4-config") 
+if (_check == "geant4-config not found"):
+    print("[G4PPYY] : ERROR : geant4-config not found. Is GEANT4 setup?")
+    raise RuntimeError
+
 # Get GEANT4 PREFIX
 _G4PREFIX = ext_cmd("geant4-config --prefix")
 print(f"[G4PPYY] : G4PREFIX : {_G4PREFIX}")
@@ -40,7 +46,8 @@ _G4VERSION = ext_cmd("geant4-config --version")
 print(f"[G4PPYY] : G4VERSION : {_G4VERSION}")
 
 if (int(_G4VERSION.split(".")[0]) < 11):
-    print("[G4PPYY] : WARNING. Only tested in G4 4.11.xx")
+    print("[G4PPYY] : ERROR : Only tested in G4 4.11.xx")
+    raise RuntimeError
 
 # Add include + lib DIRS
 try:
