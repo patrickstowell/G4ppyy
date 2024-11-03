@@ -36,6 +36,12 @@ print("[G4PPYY] : Loading G4 Modules.")
 _G4PREFIX = ext_cmd("geant4-config --prefix")
 print(f"[G4PPYY] : G4PREFIX : {_G4PREFIX}")
 
+_G4VERSION = ext_cmd("geant4-config --version")
+print(f"[G4PPYY] : G4VERSION : {_G4VERSION}")
+
+if (int(_G4VERSION.split(".")[0]) < 11):
+    print("[G4PPYY] : WARNING. Only tested in G4 4.11.xx")
+
 # Add include + lib DIRS
 try:
     cppyy.add_include_path(_os.path.abspath(f'{_G4PREFIX}/include/Geant4/'))
