@@ -72,8 +72,9 @@ try:
 except:
     pass
 
-_os.environ["LD_LIBRARY_PATH"] = _os.environ["LD_LIBRARY_PATH"] + ":" + f'{_G4PREFIX}/lib64/'
-_os.environ["LD_LIBRARY_PATH"] = _os.environ["LD_LIBRARY_PATH"] + ":" + f'{_G4PREFIX}/lib64/'
+
+# _os.environ["LD_LIBRARY_PATH"] = _os.environ["LD_LIBRARY_PATH"] + ":" + f'{_G4PREFIX}/lib64/'
+# _os.environ["LD_LIBRARY_PATH"] = _os.environ["LD_LIBRARY_PATH"] + ":" + f'{_G4PREFIX}/lib64/'
 
 # Load Libraries (recursively if required)
 def _load_g4_libraries():

@@ -2,7 +2,7 @@
 import k3d
 import numpy as np
 from k3d import matplotlib_color_maps
-import plotly.graph_objects as go
+# import plotly.graph_objects as go
 from ._lazy_loader import cppyy
 from . import _lazy_loader as _lzl
 from . import _base_visualiser
