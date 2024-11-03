@@ -33,8 +33,15 @@ def ext_cmd(cmd):
 print("[G4PPYY] : Loading G4 Modules.")
 
 # Check geant4-config present
-_check = ext_cmd("which geant4-config") 
-if (_check == "geant4-config not found"):
+def is_tool(name):
+    """Check whether `name` is on PATH and marked as executable."""
+
+    # from whichcraft import which
+    from shutil import which
+
+    return which(name) is not None
+
+if not is_tool("geant4-config"):
     print("[G4PPYY] : ERROR : geant4-config not found. Is GEANT4 setup?")
     raise RuntimeError
 
