@@ -1,0 +1,5 @@
+k3d
+plotly
+matplotlib
+numpy
+glob
