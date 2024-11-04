@@ -31,15 +31,15 @@ def __getattr__(name):
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
-from . import _si_units as SI
+from . import SI 
 
-from ._bindings import *
+# from ._bindings import *
 
-from . import _categories as register
+from . import register 
 
-from . import _managers as run
+from . import run 
 
-from . import _visualisers as vis
+from . import vis
 
 from . import builder
 

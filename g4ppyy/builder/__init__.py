@@ -1,7 +1,7 @@
 from .. import _lazy_loader as _lzl
 
-from .. import _categories
-_categories.all()
+from .. import register
+register.all()
 
 # Work in progress
 
@@ -9,7 +9,7 @@ gNistManager = _lzl.gNistManager
 G4Material = _lzl.G4Material
 G4Element = _lzl.G4Element
 G4VUserDetectorConstruction = _lzl.G4VUserDetectorConstruction
-from .._si_units import *
+from ..SI import *
 G4VSolid = _lzl.G4VSolid
 G4LogicalVolume = _lzl.G4LogicalVolume
 G4Sphere = _lzl.G4Color

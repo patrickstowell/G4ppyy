@@ -1,5 +1,5 @@
 from . import _lazy_loader as _lzl
-from . import _si_units as SI
+from . import SI as SI
 
 def materials():
     for key in ["G4Material",
