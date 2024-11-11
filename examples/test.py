@@ -14,7 +14,9 @@ import random
 
 gRunManager = g4.G4RunManager()
 
-
+print(g4.G4VUserPrimaryGeneratorAction)
+g4.include("G4VUserPrimaryGeneratorAction.hh")
+g4.include("G4VSensitiveDetector.hh")
 
 class custom_generator(g4.G4VUserPrimaryGeneratorAction):
     "Moderated Cf252 Generator"

@@ -9,22 +9,15 @@ gVisExecutive = None
 _lazy_loader.include("G4VisExecutive.icc")
 _lazy_loader.include("G4VisExecutive.hh")
 _lazy_loader.include("G4String.hh")
-
 _lazy_loader.G4VisExecutive
 _lazy_loader.G4String
 
 
 global visManager
 visManager = None
-from ._k3d_visualiser import PyCRUSTVisExecutive
+
 def build(option, settings):
     global gVisExecutive
-    global visManager
-    if not visManager:
-        visManager = PyCRUSTVisExecutive("quiet")
-        visManager.Initialize()
-
-    _lazy_loader.assign("gVisExecutive", gVisExecutive)
 
     if gVisExecutive: 
         print("Vis Executive already set!")
@@ -33,9 +26,7 @@ def build(option, settings):
     if option == "K3D":    
         gVisExecutive = _k3d_visualiser.K3DJupyterVisExecutive("quiet")
         gVisExecutive.Initialize()
-
-        # gVisExecutive.RegisterGraphicsSystems()
-
+        _lazy_loader.assign("gVisExecutive", gVisExecutive)
 
     return gVisExecutive
 

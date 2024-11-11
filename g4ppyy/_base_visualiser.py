@@ -168,23 +168,6 @@ std::vector<std::vector<int>> ObtainFacets(const G4Polyhedron& obj){
 };""")
 
 
-_lzl.cppyy.cppdef("""
-class BaseGS : public G4VGraphicsSystem {
-public: 
-    BaseGS() : G4VGraphicsSystem("Jupyter","Jupyter",G4VGraphicsSystem::threeD) {
-        fName = "Jupyter";
-        fNicknames = {"Jupyter"};
-    fDescription = "Jupyter";
-    fFunctionality = G4VGraphicsSystem::threeD;
-    }
-    virtual G4VSceneHandler* CreateSceneHandler (const G4String& name) { return NULL; };
-    virtual G4VViewer* CreateViewer (G4VSceneHandler& scenehandler, const G4String& name) { return NULL; };
-};""")
-
-# except:
-#       print("Failed to initialise base vis")
-#       pass
-
 def rgb_to_hex(r, g, b):
         """Converts RGB values (0-255) to a hex color code.
     

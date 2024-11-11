@@ -43,48 +43,6 @@ def geometry():
         _lzl.include(key + ".hh")
         _lzl.lazy_register(key)
 
-    # Handle Python-CPPYY Overrides
-    # def G4Box(name,
-    #     x : float = 1.0*SI.m,
-    #     y : float = 1.0*SI.m,
-    #     z : float = 1.0*SI.m):
-    #     return _lzl.cppyy.G4Box(name,
-    #                             x,
-    #                             y,
-    #                             z)
-    # _lzl.G4Box = G4Box
-
-    # def G4Sphere(name,
-    #             rmin : float = 0.0,
-    #             rmax : float = 1.0*SI.m,
-    #             phimin : float = 0.0,
-    #             phimax : float = SI.twopi,
-    #             thetamin : float = 0.0,
-    #             thetamax : float = SI.twopi):
-    #     return _lzl.cppyy.G4Sphere(name,
-    #                             rmin,
-    #                             rmax,
-    #                             phimin,
-    #                             phimax,
-    #                             thetamin,
-    #                             thetamax)
-    # _lzl.G4Sphere = G4Sphere
-
-    # def G4Tubs(name,
-    #     rmin : float = 0.0,
-    #     rmax : float = 1.0*SI.m,
-    #     zmax : float = 1.0*SI.m,
-    #     phimin : float = 0.0,
-    #     phimax : float = SI.twopi):
-    #     return _lzl.cppyy.G4Tubs(name,
-    #                             rmin,
-    #                             rmax,
-    #                             zmax,
-    #                             phimin,
-    #                             phimax)
-
-    # _lzl.G4Tubs = G4Tubs
-
 def all():
     managers()
     physics()

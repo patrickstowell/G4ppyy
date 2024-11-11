@@ -3,31 +3,28 @@ from .. import _lazy_loader as _lzl
 from .. import register
 register.all()
 
-# Work in progress
+from ..SI import *
 
 gNistManager = _lzl.gNistManager
-# _lzl.G4Material = _lzl._lzl.G4Material
-# _lzl.G4Element = _lzl._lzl.G4Element
-# _lzl.G4VUserDetectorConstruction = _lzl._lzl.G4VUserDetectorConstruction
-from ..SI import *
-# _lzl.G4VSolid = _lzl._lzl.G4VSolid
-# _lzl.G4LogicalVolume = _lzl._lzl.G4LogicalVolume
-# _lzl.G4Color = _lzl._lzl.G4Color
 
-# _lzl.G4Box = _lzl._lzl.G4Box
-# _lzl.G4Tubs = _lzl._lzl.G4Tubs
-# _lzl.G4Sphere = _lzl._lzl.G4Sphere
-# _lzl.G4VisAttributes = _lzl.G4VisAttributes
+G4Material = _lzl.G4Material
+G4Element = _lzl.G4Element
+G4VUserDetectorConstruction = _lzl.G4VUserDetectorConstruction
+G4VSolid = _lzl.G4VSolid
+G4LogicalVolume = _lzl.G4LogicalVolume
+G4Color = _lzl.G4Color
+G4Box = _lzl.G4Box
+G4Tubs = _lzl.G4Tubs
+G4Sphere = _lzl.G4Sphere
+G4VisAttributes = _lzl.G4VisAttributes
 G4VPhysicalVolume = _lzl.G4VPhysicalVolume
 G4VSolid = _lzl.G4VSolid
-
 G4RotationMatrix = _lzl.G4RotationMatrix
 G4ThreeVector = _lzl.G4ThreeVector
 G4PVPlacement = _lzl.G4PVPlacement
 G4MaterialPropertiesTable = _lzl.G4MaterialPropertiesTable
 
 
-print("G4VP : ", _lzl.G4VPhysicalVolume)
 # ------------------
 # MATERIALS
 # ------------------
@@ -114,9 +111,12 @@ def build_vis(col=[1.0,0.0,0.0,0.5], visible=True, drawstyle="wireframe"):
     if drawstyle == "solid":
         vis.SetForceSolid(1)
         vis.SetForceWireframe(0)
-    else:
+    elif drawstyle == 'wireframe':
         vis.SetForceSolid(0)
         vis.SetForceWireframe(1)
+    else:
+        raise RunTimeError(f"Unknown Drawstyle : {drawstyle}")
+        
     if len(col) <= 3:
         col.append(1.0)
         
@@ -267,9 +267,7 @@ def build_solid(name  : str,
         tubs(name, rmin, rmax, zmax/2, phimin, phimax)
     """
     
-    print("Building solid from box")
     if "box" in solid.lower(): 
-        print("Building box", _lzl.G4Box)
         obj = _lzl.G4Box(name, x, y, z)
         
     if "sphere" in solid.lower(): 
@@ -372,7 +370,6 @@ def build_component(name : str,
 
     component('block', logical=box, pos=[0.0,5.0,0.0], mother=world)
     """
-    print("build_component")
     if solid and material and logical:
         raise Exception("Define solid/material or logical, not both")
 

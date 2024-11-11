@@ -15,43 +15,9 @@
 # Initialize kernel
 /run/initialize
 
-/vis/open K3DJUPYTER 600x600-0+0
+/vis/open K3DJupyter 600x600-0+0
 /vis/drawVolume
 /vis/viewer/refresh
 
 /vis/viewer/set/autoRefresh true
 
-/vis/viewer/set/viewpointVector -1 0 0
-/vis/viewer/set/lightsVector -1 0 0
-/vis/viewer/set/style wireframe
-/vis/viewer/set/auxiliaryEdge true
-/vis/viewer/set/lineSegmentsPerCircle 100
-/vis/scene/add/trajectories rich
-/vis/modeling/trajectories/create/drawByParticleID
-#/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
-#/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
-/vis/scene/endOfEventAction accumulate
-/vis/set/textLayout    # Revert to normal (left adjusted) layout
-/vis/set/textColour    # Revert to default text colour (blue)
-/vis/scene/add/scale   # Simple scale line
-/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
-/vis/filtering/trajectories/create/encounteredVolumeFilter
-/vis/filtering/trajectories/encounteredVolumeFilter-0/add world
-
-
-/vis/filtering/trajectories/create/particleFilter
-/vis/filtering/trajectories/particleFilter-0/add mu-
-/vis/filtering/trajectories/particleFilter-0/add mu-
-/vis/filtering/trajectories/particleFilter-0/invert true
-
-
-
-/vis/set/colour red
-/vis/set/lineWidth 2
-/vis/scene/add/frame   # Simple frame around the view
-/vis/set/colour        # Revert to default colour (white)
-/vis/set/lineWidth     # Revert to default line width (1.)
-/vis/viewer/set/style surface
-/vis/viewer/set/hiddenMarker true
-/vis/viewer/set/viewpointThetaPhi 120 150
-/vis/viewer/set/autoRefresh true

@@ -1,2 +1,29 @@
 /run/verbose 0
 /run/initialize
+/vis/open K3DJupyter 600x600-0+0
+/vis/sceneHandler/create K3DJupyter
+/vis/viewer/create ! ! 600x600-0+0
+/vis/drawVolume
+/vis/scene/create
+/vis/scene/add/volume world -1 -1 none m 0 0 0 0 0 0
+/vis/sceneHandler/attach
+/vis/viewer/refresh
+/vis/viewer/set/autoRefresh true
+/vis/scene/add/trajectories rich
+/tracking/storeTrajectory 3
+/vis/scene/notifyHandlers
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/modeling/trajectories/drawByParticleID-0/default/setDrawStepPts True
+/vis/scene/notifyHandlers scene-0
+/vis/modeling/trajectories/drawByParticleID-0/default/setStepPtsSize 1
+/vis/scene/notifyHandlers scene-0
+/vis/modeling/trajectories/list 1
+/vis/modeling/trajectories/drawByParticleID-0/set e+ grey
+/vis/scene/notifyHandlers scene-0
+/vis/modeling/trajectories/drawByParticleID-0/set e- grey
+/vis/scene/notifyHandlers scene-0
+/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow
+/vis/scene/notifyHandlers scene-0
+/vis/modeling/trajectories/drawByParticleID-0/set neutron magenta
+/vis/scene/notifyHandlers scene-0
+/vis/scene/notifyHandlers scene-0

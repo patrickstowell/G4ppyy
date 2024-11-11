@@ -107,10 +107,15 @@ def create_visualization(gRunManager):
     UImanager.ExecuteMacroFile(_MACRO_DIR + "/jupyter_vis.mac")
 
 def draw_visualization(gRunManager):
-    
 
+    if visManager:
+        visManager.Finish()
+    
     global detector_hooks
     for obj in detector_hooks:
         start_action = getattr(obj, "VisualizationAction", None)
         if callable(start_action):
             start_action()
+
+    
+    
