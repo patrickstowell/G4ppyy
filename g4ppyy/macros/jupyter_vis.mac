@@ -15,7 +15,7 @@
 # Initialize kernel
 /run/initialize
 
-/vis/open Jupyter 600x600-0+0
+/vis/open K3DJUPYTER 600x600-0+0
 /vis/drawVolume
 /vis/viewer/refresh
 

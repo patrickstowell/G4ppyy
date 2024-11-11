@@ -14,6 +14,8 @@ _lzl.include('G4VisExecutive.hh')
 _lzl.include('G4VisExecutive.icc')
 _lzl.include('G4UIExecutive.hh')
 _lzl.include("G4ParticleTable.hh")
+_lzl.include("G4VisAttributes.hh")
+_lzl.G4VisAttributes
 
 # try:
 

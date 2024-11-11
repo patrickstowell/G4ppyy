@@ -16,8 +16,16 @@ _lzl.include("G4Polyline.hh")
 _lzl.include("G4Circle.hh")
 _lzl.include("G4VMarker.hh")
 _lzl.include("G4Visible.hh")
+_lzl.include("G4VisAttributes.hh")
+_lzl.G4VisAttributes
 
 from ._lazy_loader import G4ThreeVector
+from . import _lazy_loader
+
+_lazy_loader.include("G4VisExecutive.icc")
+_lazy_loader.include("G4VisExecutive.hh")
+_lazy_loader.G4VisExecutive
+
 
 global gfig
 gfig = k3d.plot()
@@ -292,14 +300,23 @@ class K3DJupyterGraphicsSystem(cppyy.gbl.BaseGS):
     def IsUISessionCompatible(self):
         return True
 
+cppyy.include('G4VisExecutive.hh')
+cppyy.include('G4VisExecutive.icc')
+
+class PyCRUSTVisExecutive(cppyy.gbl.G4VisExecutive):
+    def RegisterGraphicsSystems(self):
+        self.val = K3DJupyterGraphicsSystem()
+        self.RegisterGraphicsSystem(self.val);
+        self.gs = self.val
+
 class K3DJupyterVisExecutive(cppyy.gbl.G4VisExecutive):
     def RegisterGraphicsSystems(self):
         self.val = K3DJupyterGraphicsSystem()
         self.RegisterGraphicsSystem(self.val)
         self.gs = self.val
 
-    def Start(self):
-        print("Python-side Vis Activated.")
+    # def Start(self):
+    #     print("Python-side Vis Activated.")
 
-    def FinishPlot(self):
-        self.gs.viewer.scene.Finish() 
+    # def FinishPlot(self):
+    #     self.gs.viewer.scene.Finish() 

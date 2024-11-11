@@ -186,6 +186,7 @@ def __getattr__(name):
 def lazy_register(name):
     # try:
     lazy_include(name + ".hh")
+    print("Calling get attr", __getattr__(name))
     return __getattr__(name)
     # except:
         # pass

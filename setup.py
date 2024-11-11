@@ -10,6 +10,10 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/patrikstowell/G4ppyy',
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        'your_package': ['macros/*', 'g4ppyy/*', 'g4ppyy/*/*', 'g4ppyy/macros/'],  # Adjust this according to your package structure
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

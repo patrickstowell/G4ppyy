@@ -1,16 +1,26 @@
 import os 
+from . import _lazy_loader as lzl
+from . import vis as _vis
+
+lzl.include("G4UserEventAction.hh")
+lzl.include("G4UserRunAction.hh")
+lzl.include("G4UserSteppingAction.hh")
+lzl.include("G4UImanager.hh")
+lzl.include("G4UIExecutive.hh")
+lzl.include("G4VisExecutive.hh")
+
 
 _SCRIPT_DIR = os.path.dirname(__file__)
 _MACRO_DIR = os.path.dirname(__file__) + "/macros/"
 
 def handle_interactive(gRunManager):
     gRunManager.Initialize()
-    ui = G4UIExecutive(1,["test"])
+    ui = lzl.G4UIExecutive(1,["test"])
 
-    visManager = G4VisExecutive()
+    visManager = lzl.G4VisExecutive()
     visManager.Initialize()
 
-    UImanager = G4UImanager.GetUIpointer()
+    UImanager = lzl.G4UImanager.GetUIpointer()
     UImanager.ExecuteMacroFile(_MACRO_DIR + "/interactive_vis.mac")
 
     ui.SessionStart()
@@ -19,14 +29,16 @@ def handle_interactive(gRunManager):
 global handle_objects
 handle_objects = []
 
+
+
 def add_default_actions(gRunManager):
-    evaction = G4UserEventAction()
+    evaction = lzl.G4UserEventAction()
     gRunManager.SetUserAction(evaction)
 
-    runaction = G4UserRunAction()
+    runaction = lzl.G4UserRunAction()
     gRunManager.SetUserAction(runaction)
 
-    stepaction = G4UserSteppingAction()
+    stepaction = lzl.G4UserSteppingAction()
     gRunManager.SetUserAction(stepaction)
 
     global handle_objects
@@ -48,9 +60,8 @@ def register_tracking_hooks(det):
     register_detector_hooks(det)
         
 
-
 def supress_startup():
-    UImanager = G4UImanager.GetUIpointer()
+    UImanager = lzl.G4UImanager.GetUIpointer()
     UImanager.ExecuteMacroFile(_MACRO_DIR + "/jupyter_quiet.mac")
 
 def quiet_initialize(gRunManager):
@@ -85,14 +96,14 @@ ui = None
 def create_visualization(gRunManager):
     global visManager
     if not visManager:
-        visManager = PyCRUSTVisExecutive("quiet")
-        visManager.Initialize()
+        visManager = _vis.build("K3D", "quiet")
+        print("Running initializer")
 
     global ui
     if not ui:
-        ui = G4UIExecutive(1,["test"])
+        ui = lzl.G4UIExecutive(1,["test"])
 
-    UImanager = G4UImanager.GetUIpointer()
+    UImanager = lzl.G4UImanager.GetUIpointer()
     UImanager.ExecuteMacroFile(_MACRO_DIR + "/jupyter_vis.mac")
 
 def draw_visualization(gRunManager):
