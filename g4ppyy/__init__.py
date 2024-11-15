@@ -69,6 +69,39 @@ class _macro_callback_handler:
 
 mc = _macro_callback_handler()
 
+def _cpp_destructor(self):
+    self.__python_owns__ = False
+    pass
+    
+def set_cppyy_owns(self):
+    try:
+        self.__del__ = _cpp_destructor    
+    except:
+        remove_destructor(self.super())    
+    
+    try:
+        type(self).__del__ = _cpp_destructor        
+    except:
+        remove_destructor(self.super())    
+    return self
+    
+new = set_cppyy_owns
+
+
+...
+# Option 1 (at top of file)
+set_cppyy_owns(g4.G4Box)
+
+# Option 2
+new(g4.G4Box("name",1,1,1))
+
+
+
+
+
+
+
+
 print("[G4PPYY] : Imported all definitions.")
 
 
