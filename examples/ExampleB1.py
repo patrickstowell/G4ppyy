@@ -5,6 +5,7 @@ import numba
 import cppyy.numba_ext
 
 import g4ppyy as g4
+from g4ppyy import new
 
 g4.include("G4RunManagerFactory.hh")
 g4.include("G4VUserActionInitialization.hh")
@@ -245,7 +246,31 @@ class CustomSteppingAction(g4.G4UserSteppingAction):
         
         edep_step = step.GetTotalEnergyDeposit()
         self.event_action.addEdep(edep_step)
+
+class CustomAction(g4.G4VUserActionInitialization):
+    
+    def __init__(self):
+       super().__init__()
+    
+    def BuildForMaster(self):
+        run_action = CustomRunAction()
+        self.SetUserAction(run_action)
+        # pass
+    
+    def Build(self):
+        print("Custom action")
+        self.gen = CustomGenerator()
+        self.SetUserAction(self.gen)
         
+        self.run_action = CustomRunAction()
+        self.SetUserAction(self.run_action)
+        
+        self.event_action = CustomEventAction(self.run_action)
+        self.SetUserAction(self.event_action)
+        
+        self.step_action = CustomSteppingAction(self.event_action)
+        self.SetUserAction(self.step_action)
+
         
 
 def main(argc, argv):
