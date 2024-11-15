@@ -54,6 +54,7 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         super().__init__(system, id, name)
         self.global_data = []
         self.current_transform = None
+        self.nPolyhedron = 0
 
         self.nlines = 0
         self.line_option = "lines"
@@ -284,14 +285,17 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         iswireframe = True
         if vis.GetForcedDrawingStyle() == G4VisAttributes.wireframe:
             iswireframe = False
-            
-        gfig += k3d.mesh(np.array(vertices), 
-                         np.array(indices), 
-                         np.array(normals), 
-                         name="Object",
-                         opacity=opacity,
-                         wireframe=iswireframe,
-                         color=rgb_to_hex(r,g,b))
+
+        if self.nPolyhedron > 0:
+            gfig += k3d.mesh(np.array(vertices), 
+                             np.array(indices), 
+                             np.array(normals), 
+                             name="Object",
+                             visible=False, #self.nPolyhedron > 0,
+                             opacity=opacity,
+                             wireframe=iswireframe,
+                             color=rgb_to_hex(r,g,b))
+        self.nPolyhedron += 1
         
     def Finish(self):
         self.AddPolyLinesAtEnd()

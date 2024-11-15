@@ -84,8 +84,10 @@ def set_cppyy_owns(self):
     except:
         remove_destructor(self.super())    
     return self
-    
+
 new = set_cppyy_owns
+
+from . import magic as _magic
 
 print("[G4PPYY] : Imported all definitions.")
 
