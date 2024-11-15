@@ -16,7 +16,7 @@ COPY --from=johnpatrickstowell/pycrust:jupyter /app/geant4-v11.2.2/install/share
 COPY --from=johnpatrickstowell/pycrust:jupyter /app/geant4-v11.2.2/install/share/Geant4/data/PhotonEvaporation5.7/ ./PhotonEvaporation5.7
 COPY --from=johnpatrickstowell/pycrust:jupyter /app/geant4-v11.2.2/install/share/Geant4/data/RadioactiveDecay5.6/ ./RadioactiveDecay5.6
 
-# RUN wget https://cern.ch/geant4-data/datasets/G4TENDL.1.4.tar.gz; tar -zxvf G4TENDL.1.4.tar.gz; rm G4TENDL.1.4.tar.gz
+RUN wget https://cern.ch/geant4-data/datasets/G4TENDL.1.4.tar.gz; tar -zxvf G4TENDL.1.4.tar.gz; rm G4TENDL.1.4.tar.gz
 
 WORKDIR /app/geant4-v11.2.2/install/
 COPY --from=johnpatrickstowell/pycrust:jupyter /app/geant4-v11.2.2/install/lib64 ./lib64
@@ -33,26 +33,31 @@ RUN yum install -y sudo passwd which; dnf module install -y nodejs:20; pip insta
 
 RUN python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@main
 
-RUN useradd -ms /bin/bash pycrust; echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; passwd -d pycrust; usermod -aG wheel pycrust
+RUN useradd -ms /bin/bash g4user; echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; passwd -d g4user; usermod -aG wheel g4user
 
-USER pycrust
+USER g4user
 
 
 WORKDIR /app
-WORKDIR /app/pycrust
 WORKDIR /data/
 
-ENV PYCRUST_PORT=8168
-ENV PYCRUST_HOST=0.0.0.0
+ENV G4PPYY_PORT=8168
+ENV G4PPYY_HOST=0.0.0.0
 EXPOSE 8168
 
-RUN cat <<EOF > /app/geant4-v11.2.2/install/bin/pycrust-jupyter
+RUN cat <<EOF > /app/geant4-v11.2.2/install/bin/g4ppyy-jupyter
 #!/bin/sh
-jupyter lab --port \$PYCRUST_PORT --ip \$PYCRUST_HOST
+jupyter lab --port \$G4PPYY_PORT --ip \$G4PPYY_HOST
 EOF
 
-RUN chmod +x /app/geant4-v11.2.2/install/bin/pycrust-jupyter; ln -sf /app/geant4-v11.2.2/install/bin/pycrust-jupyter /app/geant4-v11.2.2/install/bin/start;
-RUN echo 'PS1="\[\033[38;5;208m\][ π - \u : \#:\W ] $ \[\033[0m\]"' >> /home/pycrust/.bashrc
+RUN cat <<EOF > /app/geant4-v11.2.2/install/bin/g4ppyy-update
+#!/bin/sh
+sudo python3 -m pip uninstall g4ppyy
+sudo python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@main
+EOF
+
+RUN chmod +x /app/geant4-v11.2.2/install/bin/g4ppyy-update; chmod +x /app/geant4-v11.2.2/install/bin/g4ppyy-jupyter; ln -sf /app/geant4-v11.2.2/install/bin/g4ppyy-jupyter /app/geant4-v11.2.2/install/bin/start;
+RUN echo 'PS1="\[\033[38;5;208m\][ \u : \#:\W ] $ \[\033[0m\]"' >> /home/g4user/.bashrc
 
 WORKDIR /data/
 RUN sudo chmod 777 /data/; sudo chmod 777 /data/
@@ -62,5 +67,5 @@ ENV LD_LIBRARY_PATH=/app/geant4-v11.2.2/install/lib64/
 ENV LD_PRELOAD=/app/geant4-v11.2.2/install/lib64/libG4run.so 
 ENV PYTHONPATH=/data/
 ENV GEANT4_DATA_DIR=/app/geant4-v11.2.2/install/share/Geant4/data
-ENV PATH=/app/geant4-v11.2.2/install/bin:/home/pycrust/.local/bin:/home/pycrust/bin://app/geant4-v11.2.2/install/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH=/app/geant4-v11.2.2/install/bin:/home/g4user/.local/bin:/home/g4user/bin://app/geant4-v11.2.2/install/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 

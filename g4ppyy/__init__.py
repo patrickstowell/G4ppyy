@@ -1,5 +1,7 @@
 print("[G4PPYY] : Geant4 Python wrapper for CPPYY")
-print("[G4PPYY] : author: P. Stowell")
+print("[G4PPYY] : Author: P. Stowell (p.stowell@sheffield.ac.uk)")
+print("[G4PPYY] :         R. Foster")
+
 import sys as _sys
 
 from . import _lazy_loader
