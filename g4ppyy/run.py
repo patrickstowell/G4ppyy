@@ -68,23 +68,29 @@ def quiet_initialize(gRunManager):
     supress_startup()
     gRunManager.Initialize()
 
-def handle_beam(gRunManager, events):
-            
-    gRunManager.Initialize()
-
+def start_of_run_detectors():
     global detector_hooks
     for obj in detector_hooks:
         start_action = getattr(obj, "StartOfRunAction", None)
         if callable(start_action):
             start_action()
-            
-    gRunManager.BeamOn(events)
 
+def end_of_run_detectors():
+    
     for obj in detector_hooks:
         end_action = getattr(obj, "EndOfRunAction", None)
         if callable(end_action):
             end_action()
+            
+def handle_beam(gRunManager, events):
+            
+    gRunManager.Initialize()
 
+    start_of_run_detectors()
+            
+    gRunManager.BeamOn(events)
+
+    end_of_run_detectors()
 
 # Tools to handle vis components
 global visManager
@@ -93,6 +99,13 @@ visManager = None
 global ui
 ui = None
 
+def draw_detectors():
+    global detector_hooks
+    for obj in detector_hooks:
+        start_action = getattr(obj, "VisualizationAction", None)
+        if callable(start_action):
+            start_action()
+            
 def create_visualization(gRunManager):
     global visManager
     if not visManager:
@@ -110,12 +123,9 @@ def draw_visualization(gRunManager):
 
     if visManager:
         visManager.Finish()
+
+    draw_detectors()
     
-    global detector_hooks
-    for obj in detector_hooks:
-        start_action = getattr(obj, "VisualizationAction", None)
-        if callable(start_action):
-            start_action()
 
     
     
