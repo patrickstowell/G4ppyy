@@ -8,9 +8,6 @@ from . import _lazy_loader as _lzl
 from . import _base_visualiser
 import matplotlib.pyplot as plt
 from ._base_visualiser import rgb_to_hex
-import numba
-import cppyy.numba_ext
-
 
 cppyy.include('G4VisExecutive.hh')
 cppyy.include('G4VisExecutive.icc')
@@ -72,7 +69,7 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
 
         self.polyline_vertices = np.zeros((self.max_lines,3)).astype(np.float32)
         self.polyline_indices = [] #np.zeros((self.max_lines,2)).astype(np.uint32)
-        self.polyline_colors = [] #np.zeros(self.max_lines).astype(np.uint32)
+        self.polyline_colors = np.zeros(self.max_lines).astype(np.uint32)
 
         self.polyline_vector_colors = np.zeros(self.max_vectors).astype(np.uint32)
         self.polyline_origins = np.zeros((self.max_vectors,3)).astype(np.float32)
@@ -99,7 +96,7 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
             p = self.current_transform.getRotation()*p + self.current_transform.getTranslation()
             
             self.polyline_vertices[self.nlines % self.max_lines] = ( [float(p.x()), float(p.y()), float(p.z())] )
-            self.polyline_colors .append(cval)
+            self.polyline_colors[self.nlines % self.max_lines] = cval
 
             if newcount >= 2:
                 self.polyline_indices.append( [self.nlines % self.max_lines, self.nlines+1 % self.max_lines] )
@@ -162,13 +159,14 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
      
         global gfig
         if self.line_option == "lines":
+            mlines = np.max([self.nlines, self.max_lines])
             print(len(self.polyline_colors), len(self.polyline_indices), len(self.polyline_vertices))
-            gfig += k3d.lines(vertices=np.array(self.polyline_vertices[0:self.nlines % self.max_lines,:]).astype(np.float32), 
-                            indices=np.array(self.polyline_indices).astype(np.float32), 
+            gfig += k3d.lines(vertices=np.array(self.polyline_vertices[0:mlines,:]).astype(np.float32), 
+                            indices=np.array(self.polyline_indices).astype(np.uint32), 
                             indices_type='segment',
                             shader='simple',
                             width=0.5,
-                            colors=np.array(self.polyline_colors).astype(np.uint32)) 
+                            colors=np.array(self.polyline_colors[0:mlines]).astype(np.uint32)) 
 
         else:
             # polyline_vector_colors

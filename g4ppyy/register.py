@@ -1,5 +1,6 @@
 from . import _lazy_loader as _lzl
 from . import SI as SI
+from . import destructor as _destructor
 
 _lzl.include("G4VUserPrimaryGeneratorAction.hh")
 _lzl.include("G4VSensitiveDetector.hh")
@@ -18,6 +19,11 @@ def materials():
 def managers():
     for key in ["G4RunManager", "G4VUserPrimaryGeneratorAction"]:
         _lzl.lazy_register(key)
+
+    _destructor.set_cppyy_owns(_lzl.G4VUserPrimaryGeneratorAction)
+    _destructor.set_cppyy_owns(_lzl.G4RunManager)
+    _destructor.set_cppyy_owns(_lzl.G4VUserDetectorConstruction)
+    _destructor.set_cppyy_owns(_lzl.G4VSensitiveDetector)
 
 
 

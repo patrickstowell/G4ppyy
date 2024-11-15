@@ -62,23 +62,27 @@ try:
 except:
     pass
 
-for dirs in str(_os.environ["G4PPYY_INCLUDE_DIRS"]).split(":"):
-    if _os.path.isdir(dirs):
-        if len(dirs) > 0:
-            cppyy.add_include_path(dirs)
+if "G4PPYY_INCLUDE_DIRS" in _os.environ:
+    for dirs in str(_os.environ["G4PPYY_INCLUDE_DIRS"]).split(":"):
+        if _os.path.isdir(dirs):
+            if len(dirs) > 0:
+                cppyy.add_include_path(dirs)
 
-for fname in str(_os.environ["G4PPYY_INCLUDE_FILES"]).split(":"):
-    if len(fname) > 0:
-        cppyy.include(fname)
+if "G4PPYY_INCLUDE_FILES" in _os.environ:
+    for fname in str(_os.environ["G4PPYY_INCLUDE_FILES"]).split(":"):
+        if len(fname) > 0:
+            cppyy.include(fname)
 
-for dirs in str(_os.environ["G4PPYY_LIBRARY_DIRS"]).split(":"):
-    if _os.path.isdir(dirs):
-        if len(dirs) > 0:
-            cppyy.add_library_path(dirs)
+if "G4PPYY_LIBRARY_DIRS" in _os.environ:
+    for dirs in str(_os.environ["G4PPYY_LIBRARY_DIRS"]).split(":"):
+        if _os.path.isdir(dirs):
+            if len(dirs) > 0:
+                cppyy.add_library_path(dirs)
 
-for fname in str(_os.environ["G4PPYY_LIBRARY_FILES"]).split(":"):
-    if len(fname) > 0:
-        cppyy.load_library(fname)
+if "G4PPYY_LIBRARY_FILES" in _os.environ:
+    for fname in str(_os.environ["G4PPYY_LIBRARY_FILES"]).split(":"):
+        if len(fname) > 0:
+            cppyy.load_library(fname)
 
 try:
     cppyy.add_library_path(_os.path.abspath(f"{_G4PREFIX}/lib64/"))
