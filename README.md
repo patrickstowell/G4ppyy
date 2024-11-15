@@ -1,3 +1,5 @@
+<img width="502" alt="image" src="https://github.com/user-attachments/assets/b06e14c4-b711-4b16-ab96-a408d25315f9">
+
 ### G4ppyy : Automated Python Bindings for GEANT4 based on CPPYY.
 
 This package is a wrapper module around the powerful CPPYY backend enabling automated python bindings for GEANT4.
