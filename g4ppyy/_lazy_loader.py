@@ -123,6 +123,13 @@ def _load_g4_libraries():
 
 _load_g4_libraries()
 
+# Load all virtual files
+for file in _glob.glob("{_G4PREFIX}/include/Geant4/G4V*.hh"):
+    try:
+        cppyy.include(file)
+    except:
+        pass
+
 # -----------------------
 # LAZY LOADER DEFINITIONS
 # -----------------------
