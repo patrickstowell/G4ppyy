@@ -31,8 +31,13 @@ def g4_compile(filename, cell):
     _lzl.include(filename)
 
     definitions.append(cell_hash)
+
+
+
+from . import run as _run
+@register_cell_magic
+def g4_k3d(filename, cell):
     
-# To use this magic, just run the following in a Jupyter cell:
-# %%g4_compile 
-# This is the content to be saved in my_file.txt
+    _run.create_visualization(None)
+    _run.draw_visualization(None)
 
