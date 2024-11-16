@@ -94,7 +94,10 @@ def update_table_properties(table, properties):
 
             xv = properties[key+"_X"]
             yv = properties[key+"_Y"]
-            
+
+            yv = [x for _, x in sorted(zip(yv, xv))]
+            xv = [x for _, x in sorted(zip(xv, xv))]
+
             table.AddProperty(key, 
                             np.array(xv),
                             np.array(yv), 
