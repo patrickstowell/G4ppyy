@@ -9,6 +9,5 @@ MeV = lzl.gbl.MeV
 GeV = lzl.gbl.GeV
 kg = lzl.gbl.kg
 g = lzl.gbl.g
-
-twopi = 2*3.14159 
-deg = 3.14159/180.0
+deg = lzl.gbl.deg
+twopi = 360.*deg

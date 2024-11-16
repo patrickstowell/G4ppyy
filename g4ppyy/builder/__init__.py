@@ -373,6 +373,10 @@ def build_component(name : str,
 
     component('block', logical=box, pos=[0.0,5.0,0.0], mother=world)
     """
+    if (name in gComponentList):
+        print("ERROR COMPONENT ALREADY IN gComponentList")
+        raise RuntimeError("Check your geo construction!")
+    
     if solid and material and logical:
         raise Exception("Define solid/material or logical, not both")
 
