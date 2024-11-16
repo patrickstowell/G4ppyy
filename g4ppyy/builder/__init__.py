@@ -81,13 +81,13 @@ import numpy as np
 
 def update_table_properties(table, properties):
 
-    constants = ["SCINTILLATIONTIMECONSTANT1", "SCINTILLATIONYIELD", "RESOLUTIONSCALE", "MIEHG_FORWARD_RATIO", "MIEHG_FORWARD", 
+    constants = ["SCINTILLATIONTIMECONSTANT1", "SCINTILLATIONTIMECONSTANT2","SCINTILLATIONYIELD", "WLSTIMECONSTANT",  "RESOLUTIONSCALE", "MIEHG_FORWARD_RATIO", "MIEHG_FORWARD", 
 "MIEHG_BACKWARD" ]
     for key in constants:
         if key in properties:
             table.AddConstProperty(key, properties[key])
             
-    dynamics = ["RINDEX", "ABSLENGTH", "SCINTILLATIONCOMPONENT1", "ABSLENGTH", "RAYLEIGH", "MIEHG" ]
+    dynamics = ["RINDEX", "ABSLENGTH", "SCINTILLATIONCOMPONENT1", "SCINTILLATIONCOMPONENT2", "WLSCOMPONENT", "ABSLENGTH", "WLSABSLENGTH", "RAYLEIGH", "MIEHG" ]
     for key in dynamics:
 
         if key+"_X" in properties and key+"_Y" in properties:
