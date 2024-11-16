@@ -5,6 +5,7 @@ The module is setup to use geant4-config to determine the location of libraries 
 load them as requested by the end user through a lazy loading interface. Several additional Jupyter tools are provided
 to support C++ compilation magic in cells on the fy using CPPYY, and 3D visualisation using K3D or matplotlib.
 
+<img width="502" alt="image" src="https://github.com/user-attachments/assets/b06e14c4-b711-4b16-ab96-a408d25315f9">
 
 #### Importing GEANT4 through G4PPYY
 G4ppyy acts as a wrapper around GEANT4, so this should simply be imported at the start of a python script or notebook.
