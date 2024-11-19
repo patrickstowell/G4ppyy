@@ -373,6 +373,7 @@ def build_component(name : str,
 
     component('block', logical=box, pos=[0.0,5.0,0.0], mother=world)
     """
+    global gComponentList
     if (name in gComponentList):
         print("ERROR COMPONENT ALREADY IN gComponentList")
         raise RuntimeError("Check your geo construction!")
@@ -389,7 +390,7 @@ def build_component(name : str,
     if rot[0] != 0.0: rotation_matrix.rotateX(rot[0])
     if rot[1] != 0.0: rotation_matrix.rotateY(rot[1])
     if rot[2] != 0.0: rotation_matrix.rotateZ(rot[2])
-    global gComponentList
+
     gComponentList.append(rotation_matrix)
 
     local_pos = _lzl.G4ThreeVector(pos[0], pos[1], pos[2])

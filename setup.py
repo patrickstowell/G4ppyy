@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+
 setup(
     name='g4ppyy',
     version='0.1.0',
@@ -8,12 +9,13 @@ setup(
     description='Python binding helper tools for G4 and CPPYY',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/patrikstowell/G4ppyy',
+    url='https://github.com/patrickstowell/G4ppyy',
     packages=find_packages(),
-    include_package_data=True,
+    py_modules = ['macros'],
     package_data={
-        'your_package': ['macros/*', 'g4ppyy/*', 'g4ppyy/*/*', 'g4ppyy/macros/'],  # Adjust this according to your package structure
+        'g4ppyy': ['macros/*', 'g4ppyy/*', 'g4ppyy/*/*', 'g4ppyy/macros/'],  # Adjust this according to your package structure
     },
+    include_package_data=True,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

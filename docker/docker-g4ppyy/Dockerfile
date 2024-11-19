@@ -69,3 +69,15 @@ ENV PYTHONPATH=/data/
 ENV GEANT4_DATA_DIR=/app/geant4-v11.2.2/install/share/Geant4/data
 ENV PATH=/app/geant4-v11.2.2/install/bin:/home/g4user/.local/bin:/home/g4user/bin://app/geant4-v11.2.2/install/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+
+USER root
+
+# Create a startup script to launch JupyterLab
+RUN echo '#!/bin/bash\nexec jupyter lab --port 8080 --ip=0.0.0.0 --no-browser --allow-root' > /usr/local/bin/start-notebook.sh \
+    && chmod +x /usr/local/bin/start-notebook.sh
+
+# Expose the JupyterLab port
+EXPOSE 8888
+ENV JUPYTER_PORT=8888
+# Set the startup command
+CMD ["/usr/local/bin/start-notebook.sh"]
