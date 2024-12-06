@@ -9,7 +9,6 @@ lzl.include("G4UImanager.hh")
 lzl.include("G4UIExecutive.hh")
 lzl.include("G4VisExecutive.hh")
 
-
 _SCRIPT_DIR = os.path.dirname(__file__)
 _MACRO_DIR = os.path.dirname(__file__) + "/macros/"
 
