@@ -80,5 +80,7 @@ def macro(callstr):
     
     UImanager.ExecuteMacroFile("./.G4temp.cmd")
 
+def build_macro_callback():
+    return _macro_callback_handler()
 
-mc = _macro_callback_handler()
+mc = build_macro_callback
