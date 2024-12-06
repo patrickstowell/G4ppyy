@@ -1,3 +1,4 @@
+import os
 from g4ppyy import new
 import g4ppyy as g4
 import sys
@@ -180,12 +181,6 @@ class CustomGenerator(g4.G4VUserPrimaryGeneratorAction):
         self.particle_gun.GeneratePrimaryVertex(event)
 
 
-class CustomAccumulableManager(g4.G4AccumulableManager):
-
-    def __init__(self):
-        super().__init__()
-
-
 class CustomAction(g4.G4VUserActionInitialization):
 
     def __init__(self):
@@ -194,89 +189,28 @@ class CustomAction(g4.G4VUserActionInitialization):
 
     def BuildForMaster(self):
         run_action = CustomRunAction()
+        run_action = g4.RunAction()
         self.SetUserAction(run_action)
-        # pass
 
     def Build(self):
         self.gen = CustomGenerator()
         self.SetUserAction(self.gen)
 
-        self.run_action = CustomRunAction()
+        self.run_action = g4.RunAction()
         self.SetUserAction(self.run_action)
 
-        self.event_action = CustomEventAction(self.run_action)
+        self.event_action = g4.EventAction(self.run_action)
         self.SetUserAction(self.event_action)
 
-        self.step_action = CustomSteppingAction(self.event_action)
+        self.step_action = g4.SteppingAction(self.event_action)
         self.SetUserAction(self.step_action)
 
 
-class CustomRunAction(g4.G4UserRunAction):
-
-    def __init__(self):
-        super().__init__()
-        self.edep = g4.G4Accumulable[g4.G4double](0)
-        self.edep2 = g4.G4Accumulable[g4.G4double](0)
-        self.accumulableManager = g4.G4AccumulableManager.Instance()
-        self.accumulableManager.RegisterAccumulable(self.edep)
-        self.accumulableManager.RegisterAccumulable(self.edep2)
-
-    def BeginOfRunAction(self, g4run):
-        g4.G4RunManager.GetRunManager().SetRandomNumberStore(False)
-        self.accumulableManager.Reset()
-        pass
-
-    def EndOfRunAction(self, g4run):
-        self.accumulableManager.Merge()
-        edep = self.edep.GetValue()
-        edep2 = self.edep2.GetValue()
-        print(f"edep: {edep}")
-        print(f"edep2: {edep2}")
-
-    def add_edep(self, edep):
-        self.edep += edep
-        self.edep2 += edep * edep
-
-
-class CustomEventAction(g4.G4UserEventAction):
-
-    def __init__(self, run_action):
-        super().__init__()
-        self.edep = 0
-        self.run_action = run_action
-
-    def BeginOfEventAction(self, event):
-        self.edep = 0
-
-    def EndOfEventAction(self, event):
-        self.run_action.add_edep(self.edep)
-        pass
-
-    def add_edep(self, edep):
-        self.edep += edep
-
-
-class CustomSteppingAction(g4.G4UserSteppingAction):
-
-    def __init__(self, event_action):
-        super().__init__()
-        self.event_action = event_action
-        self.scoring_volume = None
-
-    def UserSteppingAction(self, step):
-        if not self.scoring_volume:
-            det_con = g4.G4RunManager.GetRunManager().GetUserDetectorConstruction()
-            self.scoring_volume = det_con.GetScoringVolume()
-
-        volume = step.GetPreStepPoint().GetTouchableHandle().GetVolume().GetLogicalVolume()
-        if volume != self.scoring_volume:
-            return
-
-        edep_step = step.GetTotalEnergyDeposit()
-        self.event_action.add_edep(edep_step)
-
-
 def main(argc, argv):
+
+    cppyy.cppdef(
+        open(f"{os.path.abspath(os.path.dirname(__file__))}/cppB1Actions.cc").read())
+
     run_manager = g4.G4RunManagerFactory.CreateRunManager(
         g4.G4RunManagerType.Serial)
     custom_world = new(CustomWorld())
