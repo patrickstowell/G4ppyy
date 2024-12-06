@@ -1,11 +1,28 @@
+"""
+G4PPYY.magic : Registers Geant4 Specific Jupyter Magic
+=============
+
+Python based helper tools to register Jupyter magic if ran inside
+a Jupyter cell.
+
+Author: Patrick Stowell
+Date: 2024-12-06
+License: MIT
+"""
+
 try:
-    
+
+    # Main Jupyter Load Check    
     from IPython.core.magic import register_cell_magic
 
+    # System Imports
     import os
     import hashlib
 
+    # G4PPYY Imports
     from . import _lazy_loader as _lzl
+    from . import run as _run
+    from . macros import macro
 
     definitions = []
 
@@ -41,17 +58,21 @@ try:
         Magic function that saves the content of a cell to a file and calls my_function with the filename.
         Usage: %%save_and_call filename
         """
-        from .macros import macro
         macro(cell)
 
-
-    from . import run as _run
     @register_cell_magic
     def g4_k3d(filename, cell):
-        
+        """Creates a single cell with a jupyter k3d draw inside
+
+        Args:
+            filename (str): filename data
+            cell (str): cell data
+        """
         _run.create_visualization(None)
         _run.draw_visualization(None)
 
     print("Jupyter Magic : g4_k3d g4_compile")
+
 except:
+
     pass
