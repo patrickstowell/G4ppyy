@@ -1,3 +1,5 @@
+.G4temp.cmd
+*.g4magic*
 __pycache__
 *.egg-info
 build

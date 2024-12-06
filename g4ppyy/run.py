@@ -105,11 +105,24 @@ def draw_detectors():
         start_action = getattr(obj, "VisualizationAction", None)
         if callable(start_action):
             start_action()
-            
-def create_visualization(gRunManager):
+
+def create_mpl_visualization(gRunManager):
     global visManager
     if not visManager:
-        visManager = _vis.build("K3D", "quiet")
+        visManager = _vis.build("MPL", "quiet")
+        print("Running initializer")
+
+    global ui
+    if not ui:
+        ui = lzl.G4UIExecutive(1,["test"])
+
+    UImanager = lzl.G4UImanager.GetUIpointer()
+    UImanager.ExecuteMacroFile(_MACRO_DIR + "/mpljupyter_vis.mac")
+    
+def create_visualization(gRunManager, option="K3D"):
+    global visManager
+    if not visManager:
+        visManager = _vis.build(option, "quiet")
         print("Running initializer")
 
     global ui

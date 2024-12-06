@@ -1,5 +1,5 @@
 from . import _base_visualiser
-# from . import _mpl_visualiser as mplvis
+from . import _mpl_visualiser 
 from . import _k3d_visualiser 
 from . import _lazy_loader
 

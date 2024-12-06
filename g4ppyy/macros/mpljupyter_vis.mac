@@ -1,0 +1,23 @@
+
+# Macro file for the initialization of example B1
+# in interactive session
+#
+# Set some default verbose
+/process/had/verbose 0  
+/process/em/verbose 0 
+/control/verbose 0
+/control/saveHistory
+/run/verbose 0
+#
+# Change the default number of threads (in multi-threaded mode)
+#/run/numberOfThreads 4
+#
+# Initialize kernel
+/run/initialize
+
+/vis/open MPLJupyter 600x600-0+0
+/vis/drawVolume
+/vis/viewer/refresh
+
+/vis/viewer/set/autoRefresh true
+

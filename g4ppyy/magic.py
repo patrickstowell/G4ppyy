@@ -34,6 +34,15 @@ try:
 
         definitions.append(cell_hash)
 
+    # Define the magic command
+    @register_cell_magic
+    def g4_macro(filename, cell):
+        """
+        Magic function that saves the content of a cell to a file and calls my_function with the filename.
+        Usage: %%save_and_call filename
+        """
+        from .macros import macro
+        macro(cell)
 
 
     from . import run as _run
