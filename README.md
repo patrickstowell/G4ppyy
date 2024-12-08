@@ -78,6 +78,26 @@ from g4ppyy.SI import m
 box = g4.G4Box("new_box", 1*m, 1*m, 1*m)
 ```
 
+#### Installation
+Provided Geant4 is setup correctly then the code should automatically use geant4-config to load the files.
+
+You can install precompiled versions of Geant4 from here : https://geant4.web.cern.ch/download/11.1.1.html
+
+```
+git clone https://github.com/patrickstowell/G4ppyy.git
+wget https://cern.ch/geant4-data/releases/lib4.11.1.p01/Darwin-clang14.0.0-Ventura.tar.gz
+tar -zxvf Darwin-clang14.0.0-Ventura.tar.gz
+cd Geant4-11.1.1-Darwin/bin/
+source geant4.sh
+[Download Geant4 Data Folders]
+
+cd ../../G4ppyy
+STDCXX=17 python3 -m pip install cppyy
+python3 setup.py install
+python3
+>>> import g4ppyy as g4
+```
+
 #### Overloading Classes
 Classes can be overriden on the python side and passed into the G4 run manager to develop interfaces on the fly without a full recompilation.
 
