@@ -31,7 +31,7 @@ RUN chmod 777 -R /app/geant4-v11.2.2/install/bin/
 
 RUN yum install -y sudo passwd which; dnf module install -y nodejs:20; pip install k3d numpy matplotlib pandas; jupyter labextension install k3d; jupyter labextension enable k3d; dnf autoremove -y nodejs:20
 
-RUN python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@0e9bede1a6dbaa6b45e44575b43794727360e5d1
+RUN python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@v0.0.1
 
 RUN useradd -ms /bin/bash g4user; echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; passwd -d g4user; usermod -aG wheel g4user
 
@@ -69,6 +69,8 @@ ENV PYTHONPATH=/data/
 ENV GEANT4_DATA_DIR=/app/geant4-v11.2.2/install/share/Geant4/data
 ENV PATH=/app/geant4-v11.2.2/install/bin:/home/g4user/.local/bin:/home/g4user/bin://app/geant4-v11.2.2/install/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+COPY ./ExampleB1.py	/data/ExampleB1.py
+COPY ./SimpleSimulation.ipynb /data/SimpleSimulation.ipynb
 
 RUN echo "sudo python3 -m pip uninstall -y g4ppyy; sudo python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@main" > /app/geant4-v11.2.2/install/bin/g4ppyy-update; chmod +x /app/geant4-v11.2.2/install/bin/g4ppyy-update
 

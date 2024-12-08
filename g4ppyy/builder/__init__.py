@@ -332,12 +332,15 @@ def build_logical(name : str,
         solid = build_solid(name, solid, x, y, z, rmin, rmax, phimin, phimax, thetamin, thetamax)
 
     if isinstance(material, str):
+        
         built_material = build_material(material)
 
-    if not built_material:
-        raise ValueError(f"Could not build material: {material}")
-    
-    log = _lzl.G4LogicalVolume(solid, built_material, name)
+        if not built_material:
+          raise ValueError(f"Could not build material: {material}")
+
+        material = built_material
+  
+    log = _lzl.G4LogicalVolume(solid, material, name)
     gLogicalList.append(log)
 
     # Move to overriding drawstyles.        
