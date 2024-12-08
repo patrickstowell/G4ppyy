@@ -31,7 +31,8 @@ RUN chmod 777 -R /app/geant4-v11.2.2/install/bin/
 
 RUN yum install -y sudo passwd which; dnf module install -y nodejs:20; pip install k3d numpy matplotlib pandas; jupyter labextension install k3d; jupyter labextension enable k3d; dnf autoremove -y nodejs:20
 
-RUN python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@v0.0.1
+RUN echo 1
+RUN python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@main
 
 RUN useradd -ms /bin/bash g4user; echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; passwd -d g4user; usermod -aG wheel g4user
 
@@ -60,7 +61,7 @@ RUN chmod +x /app/geant4-v11.2.2/install/bin/g4ppyy-update; chmod +x /app/geant4
 RUN echo 'PS1="\[\033[38;5;208m\][ \u : \#:\W ] $ \[\033[0m\]"' >> /home/g4user/.bashrc
 
 WORKDIR /data/
-RUN sudo chmod 777 /data/; sudo chmod 777 /data/
+RUN sudo chmod 777 /data/; sudo chmod 777 /data/; sudo chown g4user /data/ 
 
 ENV PATH=//app/geant4-v11.2.2/install/bin/:$PATH
 ENV LD_LIBRARY_PATH=/app/geant4-v11.2.2/install/lib64/
@@ -71,7 +72,7 @@ ENV PATH=/app/geant4-v11.2.2/install/bin:/home/g4user/.local/bin:/home/g4user/bi
 
 COPY ./ExampleB1.py	/data/ExampleB1.py
 COPY ./SimpleSimulation.ipynb /data/SimpleSimulation.ipynb
-
+RUN chmod 777 /data/
 RUN echo "sudo python3 -m pip uninstall -y g4ppyy; sudo python3 -m pip install git+https://github.com/patrickstowell/G4ppyy.git@main" > /app/geant4-v11.2.2/install/bin/g4ppyy-update; chmod +x /app/geant4-v11.2.2/install/bin/g4ppyy-update
 
 
