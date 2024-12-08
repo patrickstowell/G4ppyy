@@ -46,9 +46,6 @@ from . import vis
 # Run Manager Helpers
 from . import run 
 
-# Geometry Helpers
-from . import builder
-
 # Macro Helpers
 from .macros import *
 
@@ -58,6 +55,11 @@ from .destructor import *
 # Jupyter Magic Helpers
 from . import magic as _magic
 
+# Global manager helpers
+from . import managers as _managers
+
+# Geometry Helpers
+from . import builder
 
 # Main Component Caller allowing g4.G4Box etc
 def __getattr__(name : str):

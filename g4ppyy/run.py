@@ -121,7 +121,7 @@ def create_mpl_visualization(gRunManager):
 def create_visualization(gRunManager, option="K3D"):
     global visManager
     if not visManager:
-        visManager = _vis.build(option, "quiet")
+        visManager = _vis.register_graphics_systems()
         print("Running initializer")
 
     global ui

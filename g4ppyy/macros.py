@@ -28,7 +28,7 @@ class _macro_callback_handler:
         Args:
             base (str, optional): path input to start with. Defaults to "".
         """
-        self.rdir = base
+        self.path = base
 
     def __getattr__(self, key):
         """Get attribute produces a new handler that loops back on itself
@@ -39,13 +39,13 @@ class _macro_callback_handler:
         Returns:
             _macro_callback_handler: Extended callback allowing cb.vis.trajectories, etc.
         """
-        return _macro_callback_handler(self.rdir.replace("_","-") + "/" + key)
+        return _macro_callback_handler(self.path.replace("_","-") + "/" + key)
 
-    def __dir__(self):
-        """Calling dir on the macro prints list of available commands for the current path.
+    def help(self):
+        """Calling help on the macro prints list of available commands for the current path.
         """
         UImanager = _lazy_loader.G4UImanager.GetUIpointer()
-        UImanager.ListCommands(self.rdir)
+        UImanager.ListCommands(self.path)
     
     def __call__(self, *args):
         """Main operator for the callback, which runs it int he G4UiManager
@@ -53,7 +53,7 @@ class _macro_callback_handler:
         Arguments correspond to a list of arguments in the original g4 Macro.
         .build.Box(5,5,5,cm)
         """
-        callstr = self.rdir + " "
+        callstr = self.path + " "
         for obj in args:
             callstr += str(obj) + " "
 
@@ -83,4 +83,4 @@ def macro(callstr):
 def build_macro_callback():
     return _macro_callback_handler()
 
-mc = build_macro_callback
+mc = build_macro_callback()

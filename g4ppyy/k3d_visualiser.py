@@ -1,52 +1,72 @@
+"""
+G4PPYY.k3d_visualiser : Geant4 K3D Visualiser Interface
+=============
+
+Vis tools for the K3D Graphics System
+
+Author: Patrick Stowell
+Date: 2024-12-06
+License: MIT
+"""
+
+# System Level Imports
+import numpy as np
 
 import k3d
-import numpy as np
 from k3d import matplotlib_color_maps
-# import plotly.graph_objects as go
-from ._lazy_loader import cppyy
-from . import _lazy_loader as _lzl
+
+from . import _lazy_loader as _g4
+G4ThreeVector = _g4.G4ThreeVector
+
+# Explicit Requirements
+_g4.include('G4VisExecutive.hh')
+_g4.include('G4VisExecutive.icc')
+_g4.include("G4VisExecutive.icc")
+_g4.include("G4VisExecutive.hh")
+_g4.include("G4String.hh")
+_g4.include("G4VSceneHandler.hh")
+_g4.include("G4VGraphicsSystem.hh")
+_g4.include("G4VSceneHandler.hh")
+_g4.include("globals.hh")
+_g4.include("G4Polyline.hh")
+_g4.include("G4Circle.hh")
+_g4.include("G4VMarker.hh")
+_g4.include("G4Visible.hh")
+_g4.include("G4VisAttributes.hh")
+_g4.include("G4VisExecutive.icc")
+_g4.include("G4VisExecutive.hh")
+_g4.include("G4VSceneHandler.hh")
+_g4.include("G4VGraphicsSystem.hh")
+_g4.include("G4VSceneHandler.hh")
+_g4.include("globals.hh")
+_g4.include("G4Polyline.hh")
+_g4.include("G4Circle.hh")
+_g4.include("G4VMarker.hh")
+_g4.include("G4Visible.hh")
+_g4.include('G4UImanager.hh')
+_g4.include('G4UIterminal.hh')
+_g4.include('G4VisExecutive.hh')
+_g4.include('G4VisExecutive.icc')
+_g4.include('G4UIExecutive.hh')
+_g4.include("G4ParticleTable.hh")
+_g4.include("G4VisAttributes.hh")
+
+# Locals to make it easier
+G4VMarker = _g4.G4VMarker
+G4Visible = _g4.G4VisAttributes
+G4VisAttributes = _g4.G4VisAttributes
+G4VisExecutive = _g4.G4VisExecutive
+G4String = _g4.G4String
+
+
 from . import _base_visualiser
-import matplotlib.pyplot as plt
-from ._base_visualiser import rgb_to_hex
+rgb_to_hex = _base_visualiser.rgb_to_hex
 
-cppyy.include('G4VisExecutive.hh')
-cppyy.include('G4VisExecutive.icc')
-_lzl.include("G4VisExecutive.icc")
-_lzl.include("G4VisExecutive.hh")
-_lzl.include("G4String.hh")
-_lzl.G4VisExecutive
-_lzl.G4String
+# global self.plot
+# self.plot = k3d.plot()
 
-_lzl.include("G4VSceneHandler.hh")
-_lzl.include("G4VGraphicsSystem.hh")
-_lzl.include("G4VSceneHandler.hh")
-_lzl.include("globals.hh")
-_lzl.include("G4Polyline.hh")
-_lzl.include("G4Circle.hh")
-_lzl.include("G4VMarker.hh")
-_lzl.include("G4Visible.hh")
-_lzl.include("G4VisAttributes.hh")
-
-G4VMarker = _lzl.G4VMarker
-G4Visible = _lzl.G4VisAttributes
-G4VisAttributes = _lzl.G4VisAttributes
-G4VisExecutive = _lzl.G4VisExecutive
-G4String = _lzl.G4String
-
-from ._lazy_loader import G4ThreeVector
-from . import _lazy_loader
-
-_lazy_loader.include("G4VisExecutive.icc")
-_lazy_loader.include("G4VisExecutive.hh")
-_lazy_loader.G4VisExecutive
-
-
-global gfig
-gfig = k3d.plot()
-
-
-
-class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
+# Scene Handler for K3D System, Main Draw Calls are here
+class K3DJupyterSceneHandler(_g4.BaseSceneHandler):
     def __init__(self, system, id, name):
         super().__init__(system, id, name)
         self.global_data = []
@@ -75,6 +95,23 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         self.polyline_origins = np.zeros((self.max_vectors,3)).astype(np.float32)
         self.polyline_vectors = np.zeros((self.max_vectors,3)).astype(np.float32)
 
+        self.plot = None
+        self.plot_drawn = False
+        self.plot_objects = []
+        self.CreatePlot()
+
+    def CreatePlot(self):
+        if not self.plot:
+            self.plot = k3d.plot()
+
+        while len(self.plot_objects) > 0:
+            del self.plot_objects[0]
+            del self.plot.objects[0]
+            del self.plot.object_ids[0]
+
+
+        self.plot_objects = []
+        self.nPolyhedron = 0
 
     def AddPrimitivePolyline(self, obj):
         self.current_transform = self.GetObjectTransformation()
@@ -87,12 +124,12 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         g = float(color.GetGreen())
         cval = rgb_to_hex(r,g,b)
                 
-        vertices = cppyy.gbl.GetPolylinePoints(obj)
+        vertices = _g4.GetPolylinePoints(obj)
         newcount = 0
 
         for v in vertices:
             newcount += 1
-            p = _lzl.G4ThreeVector(v[0], v[1], v[2])
+            p = _g4.G4ThreeVector(v[0], v[1], v[2])
             p = self.current_transform.getRotation()*p + self.current_transform.getTranslation()
             
             self.polyline_vertices[self.nlines % self.max_lines] = ( [float(p.x()), float(p.y()), float(p.z())] )
@@ -102,86 +139,8 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
                 self.polyline_indices.append( [self.nlines % self.max_lines, self.nlines+1 % self.max_lines] )
 
             self.nlines += 1
-
-
-            # if self.nlines >= 2:
-                
-            #     self.polyline_origins[self.nvectors % self.max_vectors] = ([(self.polyline_vertices[id1-1][0] + self.polyline_vertices[id2-1][0])/2,
-            #                                 (self.polyline_vertices[id1-1][1] + self.polyline_vertices[id2-1][1])/2,
-            #                                 (self.polyline_vertices[id1-1][2] + self.polyline_vertices[id2-1][2])/2])
-    
-            #     self.polyline_vectors[self.nvectors % self.max_vectors] = ([(self.polyline_vertices[id2-1][0] - self.polyline_vertices[id1-1][0])/4,
-            #                                 (self.polyline_vertices[id2-1][1] - self.polyline_vertices[id1-1][1])/4,
-            #                                 (self.polyline_vertices[id2-1][2] - self.polyline_vertices[id1-1][2])/4])
-            #     self.polyline_vector_colors[self.nvectors % self.max_vectors] = (cval)
-
-            #     self.nvectors += 1
-
-
-    # def AddPrimitivePolyline(self, obj):
-    #     self.current_transform = self.GetObjectTransformation()
-    #     self.nlines += 1
-        
-    #     # Limit k3D Drawer
-    #     vis = obj.GetVisAttributes()
-    #     color = vis.GetColor()
-    #     r = float(color.GetRed())
-    #     b = float(color.GetBlue())
-    #     g = float(color.GetGreen())
-    #     cval = rgb_to_hex(r,g,b)
-                
-    #     vertices = cppyy.gbl.GetPolylinePoints(obj)
-
-    #     for v in vertices:
-    #         p = _lzl.G4ThreeVector(v[0], v[1], v[2])
-    #         p = self.current_transform.getRotation()*p + self.current_transform.getTranslation()
-            
-    #         id1 = len(self.polyline_vertices)
-    #         self.polyline_vertices.append( [float(p.x()), float(p.y()), float(p.z())] )
-            
-    #         id2 = len(self.polyline_vertices)
-    #         self.polyline_colors.append(cval)
-            
-    #         if len(self.polyline_vertices) >= 2:
-    #             self.polyline_indices.append([id1-1,id2-1])
-                
-    #             self.polyline_origins.append([(self.polyline_vertices[id1-1][0] + self.polyline_vertices[id2-1][0])/2,
-    #                                         (self.polyline_vertices[id1-1][1] + self.polyline_vertices[id2-1][1])/2,
-    #                                         (self.polyline_vertices[id1-1][2] + self.polyline_vertices[id2-1][2])/2])
-    
-    #             self.polyline_vectors.append([(self.polyline_vertices[id2-1][0] - self.polyline_vertices[id1-1][0])/4,
-    #                                         (self.polyline_vertices[id2-1][1] - self.polyline_vertices[id1-1][1])/4,
-    #                                         (self.polyline_vertices[id2-1][2] - self.polyline_vertices[id1-1][2])/4])
-    #             self.polyline_vector_colors.append(cval)
-                
-                
-    def AddPolyLinesAtEnd(self):
-     
-        global gfig
-        if self.line_option == "lines":
-            mlines = np.max([self.nlines, self.max_lines])
-            print(len(self.polyline_colors), len(self.polyline_indices), len(self.polyline_vertices))
-            gfig += k3d.lines(vertices=np.array(self.polyline_vertices[0:mlines,:]).astype(np.float32), 
-                            indices=np.array(self.polyline_indices).astype(np.uint32), 
-                            indices_type='segment',
-                            shader='simple',
-                            width=0.5,
-                            colors=np.array(self.polyline_colors[0:mlines]).astype(np.uint32)) 
-
-        else:
-            # polyline_vector_colors
-            gfig += k3d.vectors(np.array(self.polyline_origins[0:self.nvectors]).astype(np.float32), 
-                                np.array(self.polyline_vectors[0:self.nvectors]).astype(np.uint32),
-                                line_width=2.0)
-
-        # gfig += k3d.points(positions=np.array(self.circle_vertices[0:self.ncircles % self.max_circles]).astype(np.float32),
-        #                 point_sizes=self.circle_sizes[0:self.ncircles % self.max_circles].astype(np.float32),
-        #                 shader='flat') 
-        
-        #, colors=self.circle_colors.astype(np.float32))
-        #, color=0xc6884b, shader='mesh', width=0.025)
-        # gfig += k3d.line(k3d_vertices, color=0xc6884b, shader='mesh', width=2)
-
+   
+  
     def AddPrimitiveCircle(self, obj):
         self.current_transform = self.GetObjectTransformation()
 
@@ -204,7 +163,33 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         
         return
 
-    
+                  
+    def AddPolyLinesAtEnd(self):
+     
+        mlines = np.max([self.nlines, self.max_lines])
+        print(len(self.polyline_colors), len(self.polyline_indices), len(self.polyline_vertices))
+        
+        self.plot_objects += [k3d.lines(vertices=np.array(self.polyline_vertices[0:mlines,:]).astype(np.float32), 
+                        indices=np.array(self.polyline_indices).astype(np.uint32), 
+                        indices_type='segment',
+                        shader='simple',
+                        width=0.5,
+                        colors=np.array(self.polyline_colors[0:mlines]).astype(np.uint32))]
+
+        # polyline_vector_colors
+        self.plot_objects += [k3d.vectors(np.array(self.polyline_origins[0:self.nvectors]).astype(np.float32), 
+                            np.array(self.polyline_vectors[0:self.nvectors]).astype(np.uint32),
+                            line_width=2.0)]
+
+        # self.plot += k3d.points(positions=np.array(self.circle_vertices[0:self.ncircles % self.max_circles]).astype(np.float32),
+        #                 point_sizes=self.circle_sizes[0:self.ncircles % self.max_circles].astype(np.float32),
+        #                 shader='flat') 
+        
+        #, colors=self.circle_colors.astype(np.float32))
+        #, color=0xc6884b, shader='mesh', width=0.025)
+        # self.plot += k3d.line(k3d_vertices, color=0xc6884b, shader='mesh', width=2)
+
+
     def AddPrimitivePolyhedron(self, obj):
         self.current_transform = self.GetObjectTransformation()
 
@@ -215,7 +200,7 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
                 p3d = obj.GetVertex(i+1)
                 vertices.append( [p3d[0], p3d[1], p3d[2]] )
 
-            facets = cppyy.gbl.ObtainFacets(obj)
+            facets = _g4.ObtainFacets(obj)
 
             normals = []
             for i in range(obj.GetNoFacets()):
@@ -266,7 +251,7 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
         
         vertices, normals, indices = get_components(obj, self.current_transform)
 
-        global gfig
+        # global self.plot
         vis = obj.GetVisAttributes()
         
         color = vis.GetColor()
@@ -285,42 +270,45 @@ class K3DJupyterSceneHandler(cppyy.gbl.BaseSceneHandler):
             iswireframe = False
 
         if self.nPolyhedron > 0:
-            gfig += k3d.mesh(np.array(vertices), 
+            self.plot_objects += [k3d.mesh(np.array(vertices), 
                              np.array(indices), 
                              np.array(normals), 
                              name="Object",
                              visible=False, #self.nPolyhedron > 0,
                              opacity=opacity,
                              wireframe=iswireframe,
-                             color=rgb_to_hex(r,g,b))
+                             color=rgb_to_hex(r,g,b))]
         self.nPolyhedron += 1
         
     def Finish(self):
+
+        if not self.plot_drawn:
+            self.plot_drawn = True
+            self.plot.display()
+
+        while len(self.plot.objects) > 0:
+            del self.plot.objects[0]
+            del self.plot.object_ids[0]
+
+
         self.AddPolyLinesAtEnd()
-        global gfig
-        gfig.display()
+        
+        # global self.plot
+        for obj in self.plot_objects:
+            self.plot += obj
+
+        
+
+
         
       
 #################################
 # SCENE HANDLER AND EXECUTIVES
 #################################
-_lzl.include("G4VSceneHandler.hh")
-_lzl.include("G4VGraphicsSystem.hh")
-_lzl.include("G4VSceneHandler.hh")
-_lzl.include("globals.hh")
-_lzl.include("G4Polyline.hh")
-_lzl.include("G4Circle.hh")
-_lzl.include("G4VMarker.hh")
-_lzl.include("G4Visible.hh")
-_lzl.include('G4UImanager.hh')
-_lzl.include('G4UIterminal.hh')
-_lzl.include('G4VisExecutive.hh')
-_lzl.include('G4VisExecutive.icc')
-_lzl.include('G4UIExecutive.hh')
-_lzl.include("G4ParticleTable.hh")
-_lzl.include("G4VisAttributes.hh")
 
-_lzl.cppyy.cppdef("""
+# The Base Scene Handler needs a name that can be set on construction
+# We make the original cppdef with the base names
+_g4.cppyy.cppdef("""
 class BaseK3DJupyter : public G4VGraphicsSystem {
 public: 
     BaseK3DJupyter() : G4VGraphicsSystem("K3DJupyter","K3DJupyter",G4VGraphicsSystem::threeD) {
@@ -333,7 +321,9 @@ public:
     virtual G4VViewer* CreateViewer (G4VSceneHandler& scenehandler, const G4String& name) { return NULL; };
 };""")
 
-class K3DJupyterViewer(cppyy.gbl.G4VViewer):
+
+
+class K3DJupyterViewer(_g4.G4VViewer):
     def __init__(self, scene, id, name):
         super().__init__(scene, id, name)
         self.name = "K3DJUPYTER"
@@ -346,15 +336,18 @@ class K3DJupyterViewer(cppyy.gbl.G4VViewer):
         return
 
     def DrawView(self):
+        self.scene.CreatePlot()
         self.scene.global_data = []   
         self.ProcessView()
+        self.scene.Finish()
         return
 
     def FinishView(self):
-        self.scene.Finish()
+        # self.scene.Finish()
+        pass
     
 
-class K3DJupyterGraphicsSystem(cppyy.gbl.BaseK3DJupyter):
+class K3DJupyterGraphicsSystem(_g4.BaseK3DJupyter):
     def __init__(self):
         super().__init__()
         
@@ -372,14 +365,36 @@ class K3DJupyterGraphicsSystem(cppyy.gbl.BaseK3DJupyter):
         return True
 
 
-class K3DJupyterVisExecutive(_lzl.G4VisExecutive):
-    def RegisterGraphicsSystems(self):
-        self.val = K3DJupyterGraphicsSystem()
-        self.RegisterGraphicsSystem(self.val)
-        self.gs = self.val
+# class K3DJupyterVisExecutive(_g4.G4VisExecutive):
+#     """_summary_
 
-    def Start(self):
-        print("Python-side Vis Activated.")
+#     Args:
+#         _lzl (_type_): _description_
+#     """
+#     def RegisterGraphicsSystems(self):
+#         self.val = K3DJupyterGraphicsSystem()
+#         self.RegisterGraphicsSystem(self.val)
+#         self.gs = self.val
 
-    def Finish(self):
-        self.gs.viewer.scene.Finish() 
+#     def Start(self):
+#         print("Python-side Vis Activated.")
+
+#     def Finish(self):
+#         self.gs.viewer.scene.Finish() 
+
+
+# try:
+#     from IPython.core.magic import register_cell_magic
+
+#     @register_cell_magic
+#     def g4_k3d(filename, cell):
+#         """Creates a single cell with a jupyter k3d draw inside
+
+#         Args:
+#             filename (str): filename data
+#             cell (str): cell data
+#         """
+#         _run.create_visualization(None)
+#         _run.draw_visualization(None)
+# except:
+#     pass

@@ -60,18 +60,7 @@ try:
         """
         macro(cell)
 
-    @register_cell_magic
-    def g4_k3d(filename, cell):
-        """Creates a single cell with a jupyter k3d draw inside
-
-        Args:
-            filename (str): filename data
-            cell (str): cell data
-        """
-        _run.create_visualization(None)
-        _run.draw_visualization(None)
-
-    print("Jupyter Magic : g4_k3d g4_compile")
+    # print("Jupyter Magic : g4_k3d g4_compile")
 
 except:
 

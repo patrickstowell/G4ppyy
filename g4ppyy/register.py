@@ -12,8 +12,7 @@ def materials():
                 "G4NistManager"]:
         _lzl.lazy_register(key)
 
-    gNistManager = _lzl.G4NistManager.Instance()
-    _lzl.assign("gNistManager", gNistManager)
+
 
 
 def managers():
