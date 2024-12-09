@@ -16,6 +16,7 @@ import k3d
 from k3d import matplotlib_color_maps
 
 from . import _lazy_loader as _g4
+
 G4ThreeVector = _g4.G4ThreeVector
 
 # Explicit Requirements
@@ -58,6 +59,7 @@ G4VisAttributes = _g4.G4VisAttributes
 G4VisExecutive = _g4.G4VisExecutive
 G4String = _g4.G4String
 
+scaling = 1.0/1000.0
 
 from . import _base_visualiser
 rgb_to_hex = _base_visualiser.rgb_to_hex
@@ -169,17 +171,17 @@ class K3DJupyterSceneHandler(_g4.BaseSceneHandler):
         mlines = np.max([self.nlines, self.max_lines])
         print(len(self.polyline_colors), len(self.polyline_indices), len(self.polyline_vertices))
         
-        self.plot_objects += [k3d.lines(vertices=np.array(self.polyline_vertices[0:mlines,:]).astype(np.float32), 
+        self.plot_objects += [k3d.lines(vertices=scaling*np.array(self.polyline_vertices[0:mlines,:]).astype(np.float32), 
                         indices=np.array(self.polyline_indices).astype(np.uint32), 
                         indices_type='segment',
                         shader='simple',
                         width=0.5,
-                        colors=np.array(self.polyline_colors[0:mlines]).astype(np.uint32))]
+                        colors=np.array(self.polyline_colors[0:mlines]).astype(np.float32))]
 
         # polyline_vector_colors
-        self.plot_objects += [k3d.vectors(np.array(self.polyline_origins[0:self.nvectors]).astype(np.float32), 
-                            np.array(self.polyline_vectors[0:self.nvectors]).astype(np.uint32),
-                            line_width=2.0)]
+        # self.plot_objects += [k3d.vectors(np.array(self.polyline_origins[0:self.nvectors]).astype(np.float32), 
+        #                     np.array(self.polyline_vectors[0:self.nvectors]).astype(np.uint32),
+        #                     line_width=2.0)]
 
         # self.plot += k3d.points(positions=np.array(self.circle_vertices[0:self.ncircles % self.max_circles]).astype(np.float32),
         #                 point_sizes=self.circle_sizes[0:self.ncircles % self.max_circles].astype(np.float32),
@@ -270,7 +272,7 @@ class K3DJupyterSceneHandler(_g4.BaseSceneHandler):
             iswireframe = False
 
         if self.nPolyhedron > 0:
-            self.plot_objects += [k3d.mesh(np.array(vertices), 
+            self.plot_objects += [k3d.mesh(scaling*np.array(vertices), 
                              np.array(indices), 
                              np.array(normals), 
                              name="Object",
