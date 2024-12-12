@@ -11,9 +11,9 @@ from . import _lazy_loader as _g4
 
 
 # Central Run Manager
-global RunManager
-RunManager = _g4.G4RunManager()
-_g4.assign("gRunManager", RunManager)
+#global RunManager
+#RunManager = _g4.G4RunManager()
+#_g4.assign("gRunManager", RunManager)
 
 
 # NIST Material Manager
