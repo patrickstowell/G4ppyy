@@ -1,6 +1,9 @@
 ### G4ppyy : Automated Python Bindings for GEANT4 based on CPPYY.
 
 This package is a wrapper module around the powerful CPPYY backend enabling automated python bindings for GEANT4.
+The G4ppyy package itself is focussed on providing an interface to support new users of GEANT4 to learn
+the basic concepts of the framework in an accessible python environment before being concerned with C++ build systems.
+
 The module is setup to use geant4-config to determine the location of libraries and header files, and automatically
 load them as requested by the end user through a lazy loading interface. Several additional Jupyter tools are provided
 to support C++ compilation magic in cells on the fy using CPPYY, and 3D visualisation using K3D or matplotlib.
